@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { NewsService } from './news.service';
-import { CreateNewsDto, UpdateNewsDto } from './dto';
-
+import { CreateNewsDto  } from './dto/createNews.dto';
+import {UpdateNewsDto} from './dto/updateNews.dto'
 @Controller('news')
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
