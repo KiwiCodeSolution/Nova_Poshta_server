@@ -10,7 +10,7 @@ imports: [
 ],
 controllers: [UserController],
 providers: [UsersService],
-exports: [UsersService]
+exports: [UsersService],
 })
 
 export class UserModule {}
