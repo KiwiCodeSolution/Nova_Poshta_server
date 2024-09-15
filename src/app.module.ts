@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailerController } from './mailer/mailer.controller';
 import { MailerService } from './mailer/mailer.service';
 import { MailModule } from './mailer/mailer.module';
+import { NewsModule } from './news/news.module';
 
 
 @Module({
@@ -13,6 +14,7 @@ import { MailModule } from './mailer/mailer.module';
     UserModule,
     AuthModule,
     MailModule,
+    NewsModule,
     
   ],
   controllers: [MailerController],
