@@ -4,6 +4,10 @@ import { Model } from 'mongoose';
 import { News } from './schemas/news.schema';
 import { CreateNewsDto } from './dto/createNews.dto';
 import { UpdateNewsDto } from './dto/updateNews.dto';
+import * as fs from 'fs';
+import { format } from 'date-fns';
+import { User, UserDocument } from 'src/users/schemas/user.schema';
+
 @Injectable()
 export class NewsService {
     constructor(@InjectModel(News.name) private newsModel: Model<News>) { }
@@ -25,20 +29,21 @@ export class NewsService {
     }
 
     async update(slug: string, updateNewsDto: UpdateNewsDto): Promise<News> {
-        if (updateNewsDto.title) {
-            updateNewsDto.slug = this.generateSlug(updateNewsDto.title);
-        }
+        // if (updateNewsDto.title) {
+        //     updateNewsDto.slug = this.generateSlug(updateNewsDto.title);
+        // }
+        // Женя нам потрібно оновлювати слаг ?
         const updatedNews = await this.newsModel
             .findOneAndUpdate({ slug }, updateNewsDto, { new: true })
             .exec();
         if (!updatedNews) throw new NotFoundException('News not found');
         return updatedNews;
     }
-
+// зробити перевірку на наявність юзера за таким айді та при видаленні зробити логування ім'я та емейла того хто видаляв 
     async delete(slug: string, userId: string): Promise<void> {
         const news = await this.newsModel.findOneAndDelete({ slug }).exec();
         if (news) {
-            this.logDeletion(news, userId);  // Логування видалення
+            this.logDeletion(news, userId); // Логування видалення
         } else {
             throw new NotFoundException('News not found');
         }
@@ -51,8 +56,20 @@ export class NewsService {
             .replace(/^-+|-+$/g, '');
     }
 
-    private logDeletion(news: News, userId: string): void {
-        console.log(`News deleted: ${news.title} by user ${userId}`);
-        // Або збереження логу у базу даних
+    private async logDeletion(news: News, userId: string): Promise<void> {
+        const logFilePath = 'logs/news_deletions.log';
+        const logEntry = `[${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}] News deleted: ${news.title} by user ${userId}\n`;
+
+        try {
+            
+            if (!fs.existsSync('logs')) {
+                fs.mkdirSync('logs');
+            }
+            
+            await fs.promises.appendFile(logFilePath, logEntry);
+            console.log('Log entry created successfully');
+        } catch (error) {
+            console.error('Error writing to log file:', error);
+        }
     }
 }
