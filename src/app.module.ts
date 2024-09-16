@@ -7,7 +7,6 @@ import { MailerService } from './mailer/mailer.service';
 import { MailModule } from './mailer/mailer.module';
 import { NewsModule } from './news/news.module';
 
-
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://localhost/nova_poshta'),
@@ -15,7 +14,6 @@ import { NewsModule } from './news/news.module';
     AuthModule,
     MailModule,
     NewsModule,
-    
   ],
   controllers: [MailerController],
   providers: [MailerService],

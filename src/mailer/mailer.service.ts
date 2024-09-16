@@ -6,10 +6,15 @@ import { UsersService } from 'src/users/users.service';
 export class MailerService {
   constructor(
     private readonly mailerService: NestMailerService,
-    private readonly userService: UsersService
-  ) { }
+    private readonly userService: UsersService,
+  ) {}
 
-  async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
+  async sendMail(
+    to: string,
+    subject: string,
+    text: string,
+    html: string,
+  ): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to,
@@ -23,13 +28,15 @@ export class MailerService {
       throw new Error(`Failed to send email to ${to}`);
     }
   }
-   // Метод для автоматической рассылки всем пользователям
-   async sendNewsletter(subject: string, text: string, html: string): Promise<void> {
+  // Метод для автоматической рассылки всем пользователям
+  async sendNewsletter(
+    subject: string,
+    text: string,
+    html: string,
+  ): Promise<void> {
     const users = await this.userService.findAll();
     for (const user of users) {
       await this.sendMail(user.email, subject, text, html);
     }
   }
-
-  
 }

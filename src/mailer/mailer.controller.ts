@@ -4,11 +4,11 @@ import { MailerDto } from './dto/mailer_send.dto';
 
 @Controller('email')
 export class MailerController {
-    constructor(private readonly mailerService: MailerService) { }
+  constructor(private readonly mailerService: MailerService) {}
 
-    @Post('send')
-    async sendEmail(@Body() dto: MailerDto) {
-        const { to, subject, text, html } = dto
-        return this.mailerService.sendMail(to, subject, text, html);
-    }
+  @Post('send')
+  async sendEmail(@Body() dto: MailerDto) {
+    const { to, subject, text, html } = dto;
+    return this.mailerService.sendMail(to, subject, text, html);
+  }
 }

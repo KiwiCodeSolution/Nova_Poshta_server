@@ -13,7 +13,7 @@ import { UserModule } from 'src/users/users.module';
         transport: {
           host: configService.get<string>('MAIL_HOST'),
           port: configService.get<number>('MAIL_PORT'),
-          secure: false, 
+          secure: false,
           auth: {
             user: configService.get<string>('MAIL_USER'),
             pass: configService.get<string>('MAIL_PASSWORD'),
@@ -24,10 +24,10 @@ import { UserModule } from 'src/users/users.module';
         },
       }),
     }),
-    ConfigModule.forRoot(), 
+    ConfigModule.forRoot(),
     UserModule,
   ],
-  providers: [MailerService,],
+  providers: [MailerService],
   exports: [MailerService],
 })
 export class MailModule {}
