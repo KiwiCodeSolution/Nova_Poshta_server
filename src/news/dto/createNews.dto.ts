@@ -1,20 +1,20 @@
-import { IsString } from "class-validator";
+import { IsString } from 'class-validator';
 
 export class CreateNewsDto {
-    @IsString()
-    readonly title: string;
+  @IsString()
+  readonly title: string;
 
-    readonly sections: string[];
+  readonly sections: string[];
 
-    @IsString()
-    readonly author: string;
+  @IsString()
+  readonly author: string;
 
-    slug: string;
+  readonly slug?: string;
 
-    readonly metaTags?: string[];
+  readonly metaTags?: string[];
 
-    @IsString()
-    readonly content: string;
-    readonly status: 'published' | 'created' | 'archived';
-    readonly publishDate?: Date;
+  @IsString()
+  readonly content: string;
+  readonly status: 'published' | 'created' | 'archived';
+  readonly publishDate?: Date;
 }

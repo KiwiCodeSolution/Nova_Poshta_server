@@ -1,19 +1,32 @@
-import { IsString } from "class-validator";
+import { IsString, IsOptional, IsEnum, IsArray } from 'class-validator';
 
 export class UpdateNewsDto {
-    @IsString()
-    title?: string;
+  @IsOptional()
+  @IsString()
+  title?: string;
 
-    sections?: string[];
+  @IsOptional()
+  @IsArray()
+  sections?: string[];
 
-    slug: string;
+  @IsOptional()
+  @IsString()
+  slug: string;
 
-    metaTags?: string[];
+  @IsOptional()
+  @IsArray()
+  metaTags?: string[];
 
-    @IsString()
-    content?: string;
+  @IsOptional()
+  @IsString()
+  content?: string;
 
-    status?: 'published' | 'created' | 'archived';
+  @IsOptional()
+  @IsEnum(['published', 'created', 'archived'], {
+    message: 'Status must be either published, created, or archived',
+  })
+  status?: 'published' | 'created' | 'archived';
 
-    publishDate?: Date;
+  @IsOptional()
+  publishDate?: Date;
 }
