@@ -1,0 +1,8 @@
+PUT http://localhost:5000/api/contacts
+Content-Type: application/json
+
+{
+  "telegram": "qnew_telegram",
+  "viber": "wnew_viber",
+
+}
