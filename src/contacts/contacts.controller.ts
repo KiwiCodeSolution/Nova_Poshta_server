@@ -13,10 +13,9 @@ export class ContactsController {
 
   @Put()
   async update(
-    @Query('field') field: string,
-    @Query('value') value: string,
+    
     @Body() updateContactDto: UpdateContactDto,
   ) {
-    return this.contactsService.updateContactByField(field, value, updateContactDto);
+    return this.contactsService.updateSingleContact( updateContactDto);
   }
 }
