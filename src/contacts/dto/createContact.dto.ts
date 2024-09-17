@@ -1,9 +1,9 @@
 import { IsOptional, IsString, IsEmail } from 'class-validator';
 
-export class CreateContactDto {
+export class ContactDto {
   @IsOptional()
   @IsEmail()
-  mail?: string;
+ mail?: string;
 
   @IsOptional()
   @IsString()
@@ -30,4 +30,10 @@ export class CreateContactDto {
   facebook?: string;
 }
 
-export class UpdateContactDto extends CreateContactDto {}
+
+export class CreateContactDto extends ContactDto {
+
+}
+export class UpdateContactDto extends ContactDto {
+
+}
