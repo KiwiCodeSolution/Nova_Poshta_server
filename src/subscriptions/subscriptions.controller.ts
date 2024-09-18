@@ -1,15 +1,20 @@
-import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus, Put } from '@nestjs/common';
 import { SubscriptionService } from './subscriptions.service';
 import { CreateSubscriptionDto } from './dto/create_subscription.dto';
 import { LogSubscriptionDto } from './dto/log_subscription.dto';
 
 @Controller('subscription')
 export class SubscriptionController {
-  constructor(private subscriptionService: SubscriptionService) {}
+  constructor(private subscriptionService: SubscriptionService) { }
 
   @Post()
   async create(@Body() createSubscriptionDto: CreateSubscriptionDto) {
     return this.subscriptionService.createSubscription(createSubscriptionDto);
+  }
+
+  @Put()
+  update() {
+
   }
 
   @Get('confirm')

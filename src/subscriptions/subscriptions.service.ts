@@ -21,6 +21,11 @@ export class SubscriptionService {
         return newSubscription.save();
     }
 
+    async updateSubscript(){
+
+    }
+
+    
     async confirmSubscription(email: string): Promise<Subscription> {
         const subscription = await this.subscriptionModel.findOne({ email });
 

@@ -4,8 +4,6 @@ import { Model } from 'mongoose';
 import { News } from './schemas/news.schema';
 import { CreateNewsDto } from './dto/createNews.dto';
 import { UpdateNewsDto } from './dto/updateNews.dto';
-import * as fs from 'fs';
-import { format } from 'date-fns';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { LoggerService } from 'src/utils/logging/logger.service';
 
@@ -44,14 +42,6 @@ export class NewsService {
         return updatedNews;
     }
 // зробити перевірку на наявність юзера за таким айді та при видаленні зробити логування ім'я та емейла того хто видаляв 
-    // async delete(slug: string, userId: string): Promise<void> {
-    //     const news = await this.newsModel.findOneAndDelete({ slug }).exec();
-    //     if (news) {
-    //         this.logDeletion(news, userId); // Логування видалення
-    //     } else {
-    //         throw new NotFoundException('News not found');
-    //     }
-    // }
     async delete(slug: string, userId: string): Promise<void> {
         const news = await this.newsModel.findOneAndDelete({ slug }).exec();
         if (news) {
@@ -70,21 +60,7 @@ export class NewsService {
             .replace(/^-+|-+$/g, '');
     }
 
-    // private async logDeletion(news: News, userId: string): Promise<void> {
-    //     const logFilePath = 'logs/news_deletions.log';
-    //     const logEntry = `[${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}] News deleted: ${news.title} by user ${userId}\n`;
-       
-    //     try {
-    //         if (!fs.existsSync('logs')) {
-    //             fs.mkdirSync('logs');
-    //         }
-            
-    //         await fs.promises.appendFile(logFilePath, logEntry);
-    //         console.log('Log entry created successfully');
-    //     } catch (error) {
-    //         console.error('Error writing to log file:', error);
-    //     }
-    // }
+  
 
 
 }

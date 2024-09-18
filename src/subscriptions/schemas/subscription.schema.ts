@@ -12,6 +12,9 @@ export class Subscription extends Document {
   @Prop({ default: false })
   subscribed: boolean;
 
+  @Prop({ type: [String], required: true })
+  array_subscripts: string[];
+
   @Prop({ default: Date.now })
   createdAt: Date;
 }
