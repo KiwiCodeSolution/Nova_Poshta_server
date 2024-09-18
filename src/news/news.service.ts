@@ -7,10 +7,14 @@ import { UpdateNewsDto } from './dto/updateNews.dto';
 import * as fs from 'fs';
 import { format } from 'date-fns';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
+import { LoggerService } from 'src/utils/logging/logger.service';
 
 @Injectable()
 export class NewsService {
-    constructor(@InjectModel(News.name) private newsModel: Model<News>) { }
+    constructor(@InjectModel(News.name) 
+    private newsModel: Model<News>,
+    private readonly loggerService: LoggerService
+) { }
 
     async create(createNewsDto: CreateNewsDto): Promise<News> {
         const slug = this.generateSlug(createNewsDto.title);
@@ -40,15 +44,25 @@ export class NewsService {
         return updatedNews;
     }
 // зробити перевірку на наявність юзера за таким айді та при видаленні зробити логування ім'я та емейла того хто видаляв 
+    // async delete(slug: string, userId: string): Promise<void> {
+    //     const news = await this.newsModel.findOneAndDelete({ slug }).exec();
+    //     if (news) {
+    //         this.logDeletion(news, userId); // Логування видалення
+    //     } else {
+    //         throw new NotFoundException('News not found');
+    //     }
+    // }
     async delete(slug: string, userId: string): Promise<void> {
         const news = await this.newsModel.findOneAndDelete({ slug }).exec();
         if (news) {
-            this.logDeletion(news, userId); // Логування видалення
+          // Логирование удаления через LoggerService
+          await this.loggerService.logDeletion(news.title, userId);
+          console.log('Новость успешно удалена и залогирована.');
         } else {
-            throw new NotFoundException('News not found');
+          throw new NotFoundException('News not found');
         }
-    }
-
+      }
+    
     private generateSlug(title: string): string {
         return title
             .toLowerCase()
@@ -56,20 +70,21 @@ export class NewsService {
             .replace(/^-+|-+$/g, '');
     }
 
-    private async logDeletion(news: News, userId: string): Promise<void> {
-        const logFilePath = 'logs/news_deletions.log';
-        const logEntry = `[${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}] News deleted: ${news.title} by user ${userId}\n`;
+    // private async logDeletion(news: News, userId: string): Promise<void> {
+    //     const logFilePath = 'logs/news_deletions.log';
+    //     const logEntry = `[${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}] News deleted: ${news.title} by user ${userId}\n`;
+       
+    //     try {
+    //         if (!fs.existsSync('logs')) {
+    //             fs.mkdirSync('logs');
+    //         }
+            
+    //         await fs.promises.appendFile(logFilePath, logEntry);
+    //         console.log('Log entry created successfully');
+    //     } catch (error) {
+    //         console.error('Error writing to log file:', error);
+    //     }
+    // }
 
-        try {
-            
-            if (!fs.existsSync('logs')) {
-                fs.mkdirSync('logs');
-            }
-            
-            await fs.promises.appendFile(logFilePath, logEntry);
-            console.log('Log entry created successfully');
-        } catch (error) {
-            console.error('Error writing to log file:', error);
-        }
-    }
+
 }

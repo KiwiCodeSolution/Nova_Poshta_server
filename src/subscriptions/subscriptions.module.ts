@@ -4,6 +4,7 @@ import { SubscriptionController } from './subscriptions.controller';
 import { SubscriptionService } from './subscriptions.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SubscriptionSchema } from './schemas/subscription.schema';
+import { LoggerService } from 'src/utils/logging/logger.service';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { SubscriptionSchema } from './schemas/subscription.schema';
     }),
   ],
   controllers: [SubscriptionController],
-  providers: [SubscriptionService],
+  providers: [SubscriptionService , LoggerService],
 })
 export class SubscriptionsModule {}

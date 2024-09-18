@@ -4,14 +4,14 @@ import { Model } from 'mongoose';
 import { Subscription } from './schemas/subscription.schema';
 import { CreateSubscriptionDto } from './dto/create_subscription.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import * as fs from 'fs';
-import * as path from 'path';
+import { LoggerService } from 'src/utils/logging/logger.service';
 
 @Injectable()
 export class SubscriptionService {
     constructor(
         @InjectModel(Subscription.name) private subscriptionModel: Model<Subscription>,
         private mailerService: MailerService,
+        private readonly loggerService: LoggerService
     ) { }
 
     async createSubscription(createSubscriptionDto: CreateSubscriptionDto): Promise<Subscription> {
@@ -41,31 +41,12 @@ export class SubscriptionService {
         });
     }
 
-    logSubscriptionToFile(name: string, email: string) {
-        const logDirectory = path.join(process.cwd(), 'logs', 'subscriptions');
-        const logFilePath = path.join(logDirectory, 'subscription_logs.txt');
-
-        if (!fs.existsSync(logDirectory)) {
-            console.log('Директория не найдена, создаем...');
-            try {
-                fs.mkdirSync(logDirectory, { recursive: true });
-                console.log('Директория создана.');
-            } catch (err) {
-                console.error('Ошибка при создании директории:', err);
-                return;
-            }
-        } else {
-            console.log('Директория существует.');
+    public async logSubscriptionToFile(name: string, email: string): Promise<void> {
+        try {
+          await this.loggerService.logSubscription(name, email);
+          console.log('Лог подписки успешно записан.');
+        } catch (error) {
+          console.error('Ошибка при записи логов о подписке:', error);
         }
-
-        const logEntry = `Дата: ${new Date().toLocaleString()}, Имя: ${name}, Email: ${email}\n`;
-
-        fs.appendFile(logFilePath, logEntry, (err) => {
-            if (err) {
-                console.error('Ошибка при записи логов о подписке:', err);
-            } else {
-                console.log('Лог подписки успешно записан.');
-            }
-        });
-    }
+      }
 }
