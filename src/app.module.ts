@@ -7,6 +7,7 @@ import { MailerService } from './mailer/mailer.service';
 import { MailModule } from './mailer/mailer.module';
 import { NewsModule } from './news/news.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ContactsModule } from './contacts/contacts.module';
     MailModule,
     NewsModule,
     ContactsModule,
+    SubscriptionsModule,
   ],
   controllers: [MailerController],
   providers: [MailerService],

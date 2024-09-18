@@ -14,11 +14,19 @@ import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto.username, signInDto.password);
   }
+
+
+  @Get('authorized')
+  @UseGuards(AuthGuard)
+  getProfile() {
+    return { message: ' your profile authorized!' };
+  }
+
 }
