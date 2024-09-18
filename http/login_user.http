@@ -2,8 +2,6 @@ POST http://localhost:5000/api/auth/login HTTP/1.1
 Content-Type: application/json
 
 {
-   "email" : "fl@gmai.com",
    "username": "qb22be",
-   "phone":"9379992",
    "password": "123456"
 }
