@@ -8,7 +8,7 @@ export class News extends Document {
 
   @Prop({ required: true, unique: true })
   slug: string;
-
+ 
   @Prop({ type: [String], required: true })
   sections: string[];
 
@@ -32,6 +32,13 @@ export class News extends Document {
 
   @Prop({ type: Date })
   publishDate: Date;
+
+  images: [
+    {
+      filename: String,
+      url: String,
+    }
+  ]
 }
 
 export const NewsSchema = SchemaFactory.createForClass(News);

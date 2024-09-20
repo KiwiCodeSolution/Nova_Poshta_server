@@ -28,7 +28,7 @@ export class MailerService {
       throw new Error(`Failed to send email to ${to}`);
     }
   }
-  // Метод для автоматической рассылки всем пользователям
+  //  для автоматической рассылки всем пользователям
   async sendNewsletter(
     subject: string,
     text: string,

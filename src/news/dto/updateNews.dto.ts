@@ -29,4 +29,10 @@ export class UpdateNewsDto {
 
   @IsOptional()
   publishDate?: Date;
+  
+  @IsOptional()
+  readonly images:[ {
+    filenme: String,
+    url: String,
+  }];
 }
