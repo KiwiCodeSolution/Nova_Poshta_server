@@ -8,6 +8,8 @@ import { MailModule } from './mailer/mailer.module';
 import { NewsModule } from './news/news.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -18,6 +20,12 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     NewsModule,
     ContactsModule,
     SubscriptionsModule,
+    ServeStaticModule.forRoot(
+      {
+        rootPath: join(__dirname, '..', 'uploads'),
+        serveRoot: '/uploads/', 
+      },
+    ),
   ],
   controllers: [MailerController],
   providers: [MailerService],
