@@ -6,24 +6,63 @@ import { CreateNewsDto } from './dto/createNews.dto';
 import { UpdateNewsDto } from './dto/updateNews.dto';
 import { LoggerService } from 'src/utils/logging/logger.service';
 import { slugify } from 'transliteration';
+import { ImageService } from './image.service';
 
 @Injectable()
 export class NewsService {
     constructor(@InjectModel(News.name)
     private newsModel: Model<News>,
-        private readonly loggerService: LoggerService
+        private readonly loggerService: LoggerService,
+        private readonly imageService: ImageService,
     ) { }
 
+
+    // async create(createNewsDto: CreateNewsDto): Promise<News> {
+    //     const slug = this.generateSlug(createNewsDto.title);
+    //     const existingNews = await this.newsModel.findOne({ slug });
+    //     if (existingNews) {
+    //         throw new ConflictException(`News with slug "${slug}" already exists`);
+    //     }
+    //     const news = new this.newsModel({ ...createNewsDto, slug });
+    //     return news.save();
+    // }
 
     async create(createNewsDto: CreateNewsDto): Promise<News> {
         const slug = this.generateSlug(createNewsDto.title);
         const existingNews = await this.newsModel.findOne({ slug });
         if (existingNews) {
-            throw new ConflictException(`News with slug "${slug}" already exists`);
+            throw new ConflictException(`Новина з ярликом "${slug}" вже існує`);
         }
+
+        let { content } = createNewsDto;
+        const imageRegex = /<img src="([^"]+)"/g;
+        let match;
+        const imagePromises = [];
+        const savedImages = [];
+
+        while ((match = imageRegex.exec(content)) !== null) {
+            const imageUrl = match[1];
+
+            if (imageUrl.startsWith('data:image/')) {
+                imagePromises.push(this.imageService.saveBase64Image(imageUrl, createNewsDto.title));
+            } else {
+                imagePromises.push(this.imageService.downloadImage(imageUrl, createNewsDto.title));
+            }
+        }
+
+        const savedImageObjects = await Promise.all(imagePromises);
+        savedImageObjects.forEach((imageObj) => {
+            content = content.replace(/<img src="data:image\/[^"]+/, `<img src="${imageObj.url}"`);
+        });
+
+        createNewsDto.content = content;
+        createNewsDto.images = savedImageObjects.map(image => image.url)
+        // createNewsDto.images = savedImageObjects;
+
         const news = new this.newsModel({ ...createNewsDto, slug });
         return news.save();
     }
+
 
     async findAll(): Promise<News[]> {
         return this.newsModel.find().exec();
@@ -63,9 +102,4 @@ export class NewsService {
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '');
     }
-
-
-
-
-
 }

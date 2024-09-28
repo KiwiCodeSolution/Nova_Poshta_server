@@ -1,4 +1,13 @@
+import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsDateString, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
+
+class ImageDto {
+  @IsString()
+  filename: string;
+
+  @IsString()
+  url: string;
+}
 
 export class CreateNewsDto {
   @IsString()
@@ -16,20 +25,19 @@ export class CreateNewsDto {
   readonly metaTags?: string[];
 
   @IsString()
-  readonly content: string;
+  content: string;
 
   @IsOptional()
   @IsEnum(['published', 'created', 'archived'])
   readonly status: 'published' | 'created' | 'archived';
-  
+
   @IsOptional()
   @IsString()
   readonly publishDate?: Date;
 
   @IsOptional()
-  @ValidateNested()
-  readonly images: [{
-    filenme: String,
-    url: String,
-  }];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images?: ImageDto[];
 }
