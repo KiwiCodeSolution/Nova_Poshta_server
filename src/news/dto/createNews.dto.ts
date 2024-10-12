@@ -17,8 +17,9 @@ export class CreateNewsDto {
   @IsArray()
   readonly sections: string[];
 
+  @IsOptional()
   @IsString()
-  readonly author: string;
+  readonly author?: string;
 
   @IsOptional()
   @IsArray()

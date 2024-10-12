@@ -32,7 +32,7 @@ export class UpdateNewsDto {
   
   @IsOptional()
   readonly images:[ {
-    filenme: String,
+    filename: String,
     url: String,
   }];
 }

@@ -18,7 +18,7 @@ export class News extends Document {
   @Prop({ default: Date.now })
   createdAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   author: string;
 
   @Prop({ type: [String] })
@@ -41,4 +41,7 @@ export class News extends Document {
   ]
 }
 
+
 export const NewsSchema = SchemaFactory.createForClass(News);
+
+NewsSchema.index({ title: 'text', content: 'text', sections: 'text' });

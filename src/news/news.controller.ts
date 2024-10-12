@@ -10,9 +10,16 @@ import {
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/createNews.dto';
 import { UpdateNewsDto } from './dto/updateNews.dto';
+
 @Controller('news')
+
 export class NewsController {
-  constructor(private readonly newsService: NewsService) {}
+  constructor(private readonly newsService: NewsService) { }
+
+  @Post('search')
+  searchNews(@Body() searchParams: any) {
+    return this.newsService.searchNews(searchParams);
+  }
 
   @Post()
   create(@Body() createNewsDto: CreateNewsDto) {
