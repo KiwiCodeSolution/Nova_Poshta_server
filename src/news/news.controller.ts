@@ -32,9 +32,11 @@ export class NewsController {
   }
 
   @Get(':slug')
-  findBySlug(@Param('slug') slug: string) {
+  async findBySlug(@Param('slug') slug: string) {
+    await this.newsService.incrementViews(slug);
     return this.newsService.findBySlug(slug);
   }
+
 
   @Put(':slug')
   update(@Param('slug') slug: string, @Body() updateNewsDto: UpdateNewsDto) {
@@ -45,4 +47,6 @@ export class NewsController {
   delete(@Param('slug') slug: string, @Param('userId') userId: string) {
     return this.newsService.delete(slug, userId);
   }
+
+
 }

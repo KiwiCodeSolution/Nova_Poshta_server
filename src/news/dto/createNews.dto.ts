@@ -40,5 +40,5 @@ export class CreateNewsDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ImageDto)
-  images?: ImageDto[];
+  images?: string[];
 }

@@ -33,12 +33,7 @@ export class News extends Document {
   @Prop({ type: Date })
   publishDate: Date;
 
-  images: [
-    {
-      filename: String,
-      url: String,
-    }
-  ]
+  images: string[]
 }
 
 
