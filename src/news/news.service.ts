@@ -51,8 +51,9 @@ export class NewsService {
         let { content } = createNewsDto;
 
         const imageRegex = /<img.*?src="([^"]+)".*?>/g;
+        // const imageRegex = /<img.*?src="([^"]+)".*?>|href="(https:\/\/[^"]+\.(jpg|jpeg|png|gif|webp))"/g;
 
-        let match;
+        let match: any[];
         const imagePromises = [];
 
         while ((match = imageRegex.exec(content)) !== null) {
@@ -64,6 +65,7 @@ export class NewsService {
                 imagePromises.push(this.imageService.downloadImage(imageUrl, createNewsDto.title));
             }
         }
+     
         const savedImageObjects = await Promise.all(imagePromises);
 
         savedImageObjects.forEach((imageObj) => {
@@ -78,6 +80,8 @@ export class NewsService {
         return news.save();
     }
 
+  
+ 
     async searchNews(searchParams: any): Promise<News[]> {
         const { query, date, topic } = searchParams;
 

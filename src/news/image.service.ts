@@ -10,6 +10,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from './config';
 
 
+
+
 @Injectable()
 export class ImageService {
     private uploadDir = path.join(__dirname, '..', '..', 'uploads');
@@ -30,10 +32,10 @@ export class ImageService {
         const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
         const slug = title ? slugify(title.toLowerCase().replace(/\s+/g, '-')) : 'image';
-        const timestamp = format(new Date(), 'yyyyMMddHHmmssSSS');
-        const uniqueId = uuidv4().slice(0, 4);
+        const timestamp = format(new Date(), 'yyyyMMddHHmmssSS');
+        // const uniqueId = uuidv4().slice(0, 4);
         const randomNumber = Math.floor(10 + Math.random() * 90);
-        const filename = `${slug}-${timestamp}-${randomNumber}-${uniqueId}.jpg`;
+        const filename = `${slug}-${timestamp}-${randomNumber}.jpg`;
         const filepath = path.join(this.uploadDir, filename);
     
         try {
@@ -49,10 +51,11 @@ export class ImageService {
 
     async downloadImage(imageUrl: string, title: string) {
         const baseUrl = this.configService.baseUrl;
-        const fileExtension = path.extname(imageUrl) || '.jpg';
+        // const fileExtension = path.extname(imageUrl) || '.jpg';
         const slug = title ? slugify(title.toLowerCase().replace(/\s+/g, '-')) : 'image';
-        const timestamp = format(new Date(), 'yyyyMMddHHmmss');
-        const filename = `${slug}-${timestamp}${fileExtension}`;
+        const timestamp = format(new Date(), 'yyyyMMddHHmmssSS');
+        const randomNumber = Math.floor(10 + Math.random() * 90);
+        const filename = `${slug}-${timestamp}-${randomNumber}.jpg`;
         const filepath = path.join(this.uploadDir, filename);
 
         try {
@@ -66,7 +69,7 @@ export class ImageService {
 
             return new Promise((resolve, reject) => {
                 response.data.on('end', () => {
-                    const fullUrl = `${baseUrl}/uploads/${filename}`;
+                    const fullUrl = `/uploads/${filename}`;
                     resolve({ originalUrl: imageUrl, filename, url: fullUrl });
                 });
 
