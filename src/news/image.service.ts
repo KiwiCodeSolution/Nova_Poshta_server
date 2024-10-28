@@ -28,6 +28,26 @@ export class ImageService {
         }
     }
   
+    async savePreviewImage(base64String: string, title: string) {
+        const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const slug = title ? slugify(title.toLowerCase().replace(/\s+/g, '-')) : 'image';
+        const timestamp = format(new Date(), 'yyyyMMddHHmmssSS');
+        const randomNumber = Math.floor(10 + Math.random() * 90);
+        const filename = `${slug}-preview-${timestamp}-${randomNumber}.jpg`;
+        const filepath = path.join(this.uploadDir, filename);
+    
+        try {
+            await fs.promises.mkdir(this.uploadDir, { recursive: true });
+            await fs.promises.writeFile(filepath, buffer);
+            const fullUrl = `/uploads/${filename}`;
+            return { originalUrl: base64String, filename, url: fullUrl };
+        } catch (err) {
+            throw new Error(`Failed to save preview image: ${err.message}`);
+        }
+    }
+    
+
     async saveBase64Image(base64String: string, title: string) {
         const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');

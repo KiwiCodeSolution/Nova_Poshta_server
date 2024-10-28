@@ -27,6 +27,14 @@ export class CreateNewsDto {
 
   @IsString()
   content: string;
+  
+  @IsOptional()
+  @IsString()
+  previewText: string;
+  
+  @IsOptional()
+  @IsString()
+  previewImage: string
 
   @IsOptional()
   @IsEnum(['published', 'created', 'archived'])

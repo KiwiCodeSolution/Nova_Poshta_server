@@ -21,6 +21,9 @@ export class News extends Document {
   @Prop({ required: false })
   author: string;
 
+  @Prop({ type: String }) 
+  previewImg: string;
+
   @Prop({ type: [String] })
   metaTags: string[];
 
@@ -33,6 +36,10 @@ export class News extends Document {
   @Prop({ type: Date })
   publishDate: Date;
 
+  @Prop({ type: String })
+  previewText: string; 
+
+  
   images: string[]
 }
 

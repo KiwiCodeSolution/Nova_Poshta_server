@@ -10,8 +10,6 @@ import { slugify } from 'transliteration';
 import { ImageService } from './image.service';
 import { ConfigService } from './config';
 
-
-
 @Injectable()
 export class NewsService {
     constructor(
@@ -19,9 +17,24 @@ export class NewsService {
         private readonly loggerService: LoggerService,
         private readonly imageService: ImageService,
         private readonly configService: ConfigService,
-     
-    ) { }
 
+    ) { }
+    async uploadPreviewImage(previewImage: string, title: string) {
+        const previewImageObj = await this.imageService.savePreviewImage(previewImage, title);
+        return {
+            message: 'Preview image uploaded successfully',
+            url: previewImageObj.url,
+        };
+    }
+    
+
+ async findById(id: string): Promise<News> {
+        const news = await this.newsModel.findById(id).exec();
+        if (!news) {
+            throw new NotFoundException(`Новость с ID ${id} не найдена`);
+        }
+        return news;
+    }
 
     private addBaseUrlToImages(news: News): News {
         const baseUrl = this.configService.baseUrl;
@@ -38,7 +51,20 @@ export class NewsService {
 
         return news;
     }
-
+    private extractTextFromParagraphs(content: string): string {
+        const paragraphRegex = /<p[^>]*>(.*?)<\/p>/g;
+        let match: RegExpExecArray | null;
+        let paragraphText = '';
+        while ((match = paragraphRegex.exec(content)) !== null) {
+            paragraphText += match[1]; 
+        }
+        paragraphText = paragraphText.replace(/&[^;]+;/g, ''); 
+        paragraphText = paragraphText.replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
+        let preview = paragraphText.trim().substring(0, 100);
+        preview += '...';
+       
+        return preview;
+    }
 
     async create(createNewsDto: CreateNewsDto): Promise<News> {
         const slug = this.generateSlug(createNewsDto.title);
@@ -65,7 +91,7 @@ export class NewsService {
                 imagePromises.push(this.imageService.downloadImage(imageUrl, createNewsDto.title));
             }
         }
-     
+
         const savedImageObjects = await Promise.all(imagePromises);
 
         savedImageObjects.forEach((imageObj) => {
@@ -75,13 +101,13 @@ export class NewsService {
 
         createNewsDto.content = content;
         createNewsDto.images = savedImageObjects.map(image => image.url);
-
-        const news = new this.newsModel({ ...createNewsDto, slug });
+        const previewText = this.extractTextFromParagraphs(content);
+        const news = new this.newsModel({ ...createNewsDto, slug, previewText, });
         return news.save();
     }
 
-  
- 
+
+
     async searchNews(searchParams: any): Promise<News[]> {
         const { query, date, topic } = searchParams;
 

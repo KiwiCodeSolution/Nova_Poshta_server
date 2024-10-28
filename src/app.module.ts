@@ -10,6 +10,8 @@ import { ContactsModule } from './contacts/contacts.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { FilesController } from './files/files.controller';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -20,14 +22,16 @@ import { join } from 'path';
     NewsModule,
     ContactsModule,
     SubscriptionsModule,
+    FilesModule,
     ServeStaticModule.forRoot(
       {
         rootPath: join(__dirname, '..', 'uploads'),
         serveRoot: '/uploads/', 
       },
     ),
+    FilesModule,
   ],
-  controllers: [MailerController],
+  controllers: [MailerController, FilesController],
   providers: [MailerService],
 })
 export class AppModule {}
