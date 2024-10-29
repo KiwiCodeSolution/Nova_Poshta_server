@@ -13,3 +13,4 @@ export class MailerDto {
   @IsString()
   html: string;
 }
+

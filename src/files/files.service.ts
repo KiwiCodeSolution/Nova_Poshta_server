@@ -4,7 +4,7 @@ import { join } from 'path';
 
 @Injectable()
 export class FilesService {
-  private readonly uploadPath = join(process.cwd(), 'doc');
+  private readonly uploadPath = join(process.cwd(), '..', 'doc');
 
   handleFileUpload(file: Express.Multer.File) {
     const filePath = join(this.uploadPath, file.originalname);
