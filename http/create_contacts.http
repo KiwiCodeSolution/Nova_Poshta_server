@@ -2,11 +2,11 @@ POST http://localhost:5000/api/contacts HTTP/1.1
 Content-Type: application/json
 
 {
-  "mail": "example@mail.com",
-  "telegram": "example_telegram",
-  "viber": "example_viber",
-  "messenger": "example_messenger",
-  "instagram": "example_instagram",
-  "youtube": "example_youtube",
-  "facebook": "example_facebook"
+  "mail": "exwample@mail.com",
+  "telegram": "esxample_telegram",
+  "viber": "exasmple_viber",
+  "messenger": "exsample_messenger",
+  "instagram": "exsample_instagram",
+  "youtube": "examsple_youtube",
+  "facebook": "exxample_facebook"
 }
