@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+     "import:ppo": "ts-node -r tsconfig-paths/register src/ppo/seed-ppo-data.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -25,6 +26,7 @@
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.4.4",
     "@nestjs/jwt": "^10.2.0",
+    "@nestjs/mapped-types": "^2.0.6",
     "@nestjs/mongoose": "^10.0.10",
     "@nestjs/platform-express": "^10.4.5",
     "@nestjs/serve-static": "^4.0.2",
