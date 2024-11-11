@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto, UpdateContactDto } from './dto/createContact.dto';
 
@@ -17,5 +17,14 @@ export class ContactsController {
     @Body() updateContactDto: UpdateContactDto,
   ) {
     return this.contactsService.updateSingleContact( updateContactDto);
+  }
+  @Get()
+  async getAllContacts() {
+    return this.contactsService.getAllContacts();
+  }
+
+  @Get(':id')
+  async getContactById(@Param('id') id: string) {
+    return this.contactsService.getContactById(id);
   }
 }

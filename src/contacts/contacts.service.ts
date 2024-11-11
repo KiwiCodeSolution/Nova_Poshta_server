@@ -32,4 +32,16 @@ export class ContactsService {
   
     return updatedContact;
   }
+
+  async getAllContacts(): Promise<Contacts[]> {
+    return this.contactsModel.find().exec();
+  }
+
+  async getContactById(id: string): Promise<Contacts> {
+    const contact = await this.contactsModel.findById(id).exec();
+    if (!contact) {
+      throw new NotFoundException(`Contact with ID ${id} not found`);
+    }
+    return contact;
+  }
 }

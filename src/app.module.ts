@@ -12,26 +12,27 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FilesController } from './files/files.controller';
 import { FilesModule } from './files/files.module';
+import { PpoService } from './ppo/ppo.service';
+import { PpoController } from './ppo/ppo.controller';
+import { PpoModule } from './ppo/ppo.module';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://localhost/nova_poshta'),
     UserModule,
+    PpoModule,
     AuthModule,
     MailModule,
     NewsModule,
     ContactsModule,
     SubscriptionsModule,
     FilesModule,
-    ServeStaticModule.forRoot(
-      {
-        rootPath: join(__dirname, '..', 'uploads'),
-        serveRoot: '/uploads/', 
-      },
-    ),
-    FilesModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads/',
+    }),
   ],
-  controllers: [MailerController, FilesController],
-  providers: [MailerService],
+  controllers: [MailerController, FilesController, PpoController],
+  providers: [MailerService, PpoService],
 })
 export class AppModule {}
