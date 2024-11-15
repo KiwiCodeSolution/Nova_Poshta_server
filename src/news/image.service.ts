@@ -9,13 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from './config';
 
-
-
-
 @Injectable()
 export class ImageService {
     private uploadDir = path.join(__dirname, '..', '..', 'uploads');
-
     constructor(
         private readonly configService: ConfigService,
     ) {
@@ -27,7 +23,7 @@ export class ImageService {
             throw new Error(`Не удалось создать директорию загрузок: ${err.message}`);
         }
     }
-  
+
     async savePreviewImage(base64String: string, title: string) {
         const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
@@ -36,7 +32,7 @@ export class ImageService {
         const randomNumber = Math.floor(10 + Math.random() * 90);
         const filename = `${slug}-preview-${timestamp}-${randomNumber}.jpg`;
         const filepath = path.join(this.uploadDir, filename);
-    
+
         try {
             await fs.promises.mkdir(this.uploadDir, { recursive: true });
             await fs.promises.writeFile(filepath, buffer);
@@ -46,7 +42,7 @@ export class ImageService {
             throw new Error(`Failed to save preview image: ${err.message}`);
         }
     }
-    
+
 
     async saveBase64Image(base64String: string, title: string) {
         const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
@@ -57,7 +53,7 @@ export class ImageService {
         const randomNumber = Math.floor(10 + Math.random() * 90);
         const filename = `${slug}-${timestamp}-${randomNumber}.jpg`;
         const filepath = path.join(this.uploadDir, filename);
-    
+
         try {
             await fs.promises.mkdir(this.uploadDir, { recursive: true });
             await fs.promises.writeFile(filepath, buffer);
@@ -67,7 +63,7 @@ export class ImageService {
             throw new Error(`Failed to save image: ${err.message}`);
         }
     }
-    
+
 
     async downloadImage(imageUrl: string, title: string) {
         const baseUrl = this.configService.baseUrl;

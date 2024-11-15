@@ -21,11 +21,11 @@ export class SubscriptionService {
         return newSubscription.save();
     }
 
-    async updateSubscript(){
+    async updateSubscript() {
 
     }
 
-    
+
     async confirmSubscription(email: string): Promise<Subscription> {
         const subscription = await this.subscriptionModel.findOne({ email });
 
@@ -48,10 +48,10 @@ export class SubscriptionService {
 
     public async logSubscriptionToFile(name: string, email: string): Promise<void> {
         try {
-          await this.loggerService.logSubscription(name, email);
-          console.log('Лог подписки успешно записан.');
+            await this.loggerService.logSubscription(name, email);
+            console.log('Лог подписки успешно записан.');
         } catch (error) {
-          console.error('Ошибка при записи логов о подписке:', error);
+            console.error('Ошибка при записи логов о подписке:', error);
         }
-      }
+    }
 }
