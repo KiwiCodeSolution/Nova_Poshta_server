@@ -43,6 +43,10 @@ export class CreateNewsDto {
   @IsOptional()
   @IsString()
   readonly publishDate?: Date;
+  
+  @IsOptional()
+  @IsDateString()
+  readonly datetime?: Date;
 
   @IsOptional()
   @IsArray()
