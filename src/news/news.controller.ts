@@ -15,12 +15,12 @@ import { UpdateNewsDto } from './dto/updateNews.dto';
 
 export class NewsController {
   constructor(private readonly newsService: NewsService) { }
-  
-  @Post('upload-preview')
-  async uploadPreviewImage(@Body() body: { previewImage: string, title: string }) {
-      return this.newsService.uploadPreviewImage(body.previewImage, body.title);
-  }
-  
+
+  // @Post('upload-preview')
+  // async uploadPreviewImage(@Body() body: { previewImage: string, title: string }) {
+  //   return this.newsService.uploadPreviewImage(body.previewImage, body.title);
+  // }
+
 
   @Get('id/:id')
   async findById(@Param('id') id: string) {

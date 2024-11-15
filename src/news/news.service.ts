@@ -1,4 +1,4 @@
-
+import { Logger } from '@nestjs/common';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,29 +9,35 @@ import { LoggerService } from 'src/utils/logging/logger.service';
 import { slugify } from 'transliteration';
 import { ImageService } from './image.service';
 import { ConfigService } from './config';
+import { PpoService } from 'src/ppo/ppo.service';
+import { Ppo, PpoSchema } from 'src/ppo/schemas/ppo.schema';
 
 @Injectable()
 export class NewsService {
     constructor(
         @InjectModel(News.name) private newsModel: Model<News>,
+        @InjectModel(Ppo.name) private ppoModel: Model<Ppo>,
         private readonly loggerService: LoggerService,
         private readonly imageService: ImageService,
         private readonly configService: ConfigService,
+        private readonly ppoService: PpoService,
 
     ) { }
     async uploadPreviewImage(previewImage: string, title: string) {
         const previewImageObj = await this.imageService.savePreviewImage(previewImage, title);
         return {
-            message: 'Preview image uploaded successfully',
+            message: 'Зображення попереднього перегляду успішно завантажено',
             url: previewImageObj.url,
         };
     }
-    
 
- async findById(id: string): Promise<News> {
+
+    async findById(id: string): Promise<News> {
+        const news2 = await this.newsModel.find().exec();
+        console.log(news2);
         const news = await this.newsModel.findById(id).exec();
         if (!news) {
-            throw new NotFoundException(`Новость с ID ${id} не найдена`);
+            throw new NotFoundException(`Новина з ID ${id} не знайдена`);
         }
         return news;
     }
@@ -56,15 +62,16 @@ export class NewsService {
         let match: RegExpExecArray | null;
         let paragraphText = '';
         while ((match = paragraphRegex.exec(content)) !== null) {
-            paragraphText += match[1]; 
+            paragraphText += match[1];
         }
-        paragraphText = paragraphText.replace(/&[^;]+;/g, ''); 
-        paragraphText = paragraphText.replace(/[\u{1F600}-\u{1F6FF}]/gu, ''); 
+        paragraphText = paragraphText.replace(/&[^;]+;/g, '');
+        paragraphText = paragraphText.replace(/[\u{1F600}-\u{1F6FF}]/gu, '');
         let preview = paragraphText.trim().substring(0, 100);
         preview += '...';
-       
+
         return preview;
     }
+
 
     async create(createNewsDto: CreateNewsDto): Promise<News> {
         const slug = this.generateSlug(createNewsDto.title);
@@ -77,8 +84,7 @@ export class NewsService {
         let { content } = createNewsDto;
 
         const imageRegex = /<img.*?src="([^"]+)".*?>/g;
-        // const imageRegex = /<img.*?src="([^"]+)".*?>|href="(https:\/\/[^"]+\.(jpg|jpeg|png|gif|webp))"/g;
-
+        const timeRegex = /<time datetime="([^"]+)">/;
         let match: any[];
         const imagePromises = [];
 
@@ -101,39 +107,87 @@ export class NewsService {
 
         createNewsDto.content = content;
         createNewsDto.images = savedImageObjects.map(image => image.url);
+
+        const timeMatch = content.match(timeRegex);
+        const datetime = timeMatch ? new Date(timeMatch[1]) : null;
+
         const previewText = this.extractTextFromParagraphs(content);
-        const news = new this.newsModel({ ...createNewsDto, slug, previewText, });
+        const news = new this.newsModel({
+            ...createNewsDto,
+            slug,
+            previewText,
+            datetime,
+        });
+
         return news.save();
     }
 
-
-
-    async searchNews(searchParams: any): Promise<News[]> {
+    async searchNews(searchParams: any): Promise<any[]> {
         const { query, date, topic } = searchParams;
+        const logger = new Logger('NewsService');
 
-        const filters: any = {};
-
+        const newsFilters: any = {};
         if (query) {
-            filters.$or = [
+            newsFilters.$or = [
                 { title: { $regex: query, $options: 'i' } },
                 { content: { $regex: query, $options: 'i' } },
                 { sections: { $regex: query, $options: 'i' } },
             ];
         }
-
         if (date) {
             const startDate = new Date(date);
             const endDate = new Date(date);
             endDate.setHours(23, 59, 59, 999);
-            filters.createdAt = { $gte: startDate, $lte: endDate };
+            newsFilters.createdAt = { $gte: startDate, $lte: endDate };
         }
-
         if (topic) {
-            filters.sections = { $in: [topic] };
+            newsFilters.sections = { $in: [topic] };
         }
 
-        return this.newsModel.find(filters).exec();
+        logger.log(`News Filters: ${JSON.stringify(newsFilters)}`);
+
+        const newsResults = await this.newsModel.find(newsFilters).exec();
+        logger.log(`Found News results: ${newsResults.length}`);
+        if (newsResults.length > 0) {
+            logger.log(`First News result: ${JSON.stringify(newsResults[0])}`);
+        }
+
+        const ppoFilters: any = {};
+        if (query) {
+            ppoFilters.$or = [
+                { region: { $regex: query.trim(), $options: 'i' } },
+                { region_name: { $regex: query.trim(), $options: 'i' } },
+                { director: { $regex: query.trim(), $options: 'i' } },
+                { position: { $regex: query.trim(), $options: 'i' } },
+                { email: { $regex: query.trim(), $options: 'i' } },
+                { phone: { $regex: query.trim(), $options: 'i' } },
+                { admission_address: { $regex: query.trim(), $options: 'i' } },
+                { application_address: { $regex: query.trim(), $options: 'i' } },
+                { link_news: { $regex: query.trim(), $options: 'i' } },
+                { link: { $regex: query.trim(), $options: 'i' } },
+                { committee: { $regex: query.trim(), $options: 'i' } },
+            ];
+        }
+
+        try {
+            const ppoResults = await this.ppoModel.find(ppoFilters).exec();
+            if (ppoResults.length > 0) {
+                logger.log(`First PPO result: ${JSON.stringify(ppoResults[0])}`);
+            }
+            return [...newsResults, ...ppoResults];
+        } catch (error) {
+
+            logger.error(`Error while searching PPO: ${error.message}`);
+            throw error;
+        }
     }
+
+    async findWithFilters(filters: any): Promise<any[]> {
+        console.log('Applied Filters:', filters);
+        const results = await this.ppoModel.find(filters).exec();
+        return results;
+    }
+
 
 
     async findAll(): Promise<News[]> {
@@ -159,7 +213,7 @@ export class NewsService {
         const news = await this.newsModel.findOneAndDelete({ slug }).exec();
         if (news) {
             await this.loggerService.logDeletion(news.title, userId);
-            console.log('Новость успешно удалена и залогирована.');
+            console.log('Новина успішно видалена та залогована.');
         } else {
             throw new NotFoundException('News not found');
         }
@@ -179,7 +233,7 @@ export class NewsService {
         ).exec();
 
         if (!result) {
-            throw new NotFoundException('News not found');
+            throw new NotFoundException('Новини не знайдено');
         }
     }
 

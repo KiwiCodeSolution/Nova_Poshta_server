@@ -8,12 +8,15 @@ export class News extends Document {
 
   @Prop({ required: true, unique: true })
   slug: string;
- 
+
   @Prop({ type: [String], required: true })
   sections: string[];
 
   @Prop({ default: 0 })
   views: number;
+
+  @Prop({ type: Date, required: false })
+  datetime: Date;
 
   @Prop({ default: Date.now })
   createdAt: Date;
@@ -21,7 +24,7 @@ export class News extends Document {
   @Prop({ required: false })
   author: string;
 
-  @Prop({ type: String }) 
+  @Prop({ type: String })
   previewImg: string;
 
   @Prop({ type: [String] })
@@ -37,9 +40,9 @@ export class News extends Document {
   publishDate: Date;
 
   @Prop({ type: String })
-  previewText: string; 
+  previewText: string;
 
-  
+
   images: string[]
 }
 
