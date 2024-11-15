@@ -9,7 +9,6 @@ export class FilesService {
   handleFileUpload(file: Express.Multer.File) {
     const filePath = join(this.uploadPath, file.originalname);
 
-    // Видаляємо старий файл, якщо він існує
     if (existsSync(filePath)) {
       try {
         unlinkSync(filePath);
