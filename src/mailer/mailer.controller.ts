@@ -27,7 +27,8 @@ export class MailerController {
     `;
 
     return this.mailerService.sendMail(
-      'taar12sh@gmail.com',
+      // 'taar12sh@gmail.com',
+      'E.a.poduzova@gmail.com',
       subject,
       text,
       html,
