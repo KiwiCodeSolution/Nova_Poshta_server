@@ -5,7 +5,7 @@ import { UpdatePpoDto } from './dto/update-ppo.dto';
 
 @Controller('ppo')
 export class PpoController {
-  constructor(private readonly ppoService: PpoService) {}
+  constructor(private readonly ppoService: PpoService) { }
 
   @Post()
   async create(@Body() createPpoDto: CreatePpoDto) {

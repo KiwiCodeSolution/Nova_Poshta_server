@@ -7,7 +7,7 @@ import { UpdatePpoDto } from './dto/update-ppo.dto';
 
 @Injectable()
 export class PpoService {
-  constructor(@InjectModel(Ppo.name) private  ppoModel: Model<Ppo>) {}
+  constructor(@InjectModel(Ppo.name) private ppoModel: Model<Ppo>) { }
 
   async create(createPpoDto: CreatePpoDto): Promise<Ppo> {
     const createdPpo = new this.ppoModel(createPpoDto);
@@ -21,7 +21,7 @@ export class PpoService {
   async findOne(id: string): Promise<Ppo> {
     const ppo = await this.ppoModel.findById(id).exec();
     if (!ppo) {
-      throw new NotFoundException(`PPO with ID ${id} not found`);
+      throw new NotFoundException(`ППО з ID ${id} не знайдено`);
     }
     return ppo;
   }
@@ -32,7 +32,7 @@ export class PpoService {
       runValidators: true,
     }).exec();
     if (!updatedPpo) {
-      throw new NotFoundException(`PPO with ID ${id} not found`);
+      throw new NotFoundException(`ППО з ID ${id} не знайдено`);
     }
     return updatedPpo;
   }
@@ -40,7 +40,8 @@ export class PpoService {
   async remove(id: string): Promise<void> {
     const result = await this.ppoModel.findByIdAndDelete(id).exec();
     if (!result) {
-      throw new NotFoundException(`PPO with ID ${id} not found`);
+      throw new NotFoundException(`ППО з ID ${id} не знайдено`);
     }
   }
+
 }
