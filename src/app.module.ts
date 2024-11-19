@@ -15,6 +15,7 @@ import { FilesModule } from './files/files.module';
 import { PpoService } from './ppo/ppo.service';
 import { PpoController } from './ppo/ppo.controller';
 import { PpoModule } from './ppo/ppo.module';
+import { GallereyModule } from './gallerey/gallerey.module';
 
 @Module({
   imports: [
@@ -24,12 +25,21 @@ import { PpoModule } from './ppo/ppo.module';
     AuthModule,
     MailModule,
     NewsModule,
+    GallereyModule,
     ContactsModule,
     SubscriptionsModule,
     FilesModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads/',
+    }),
+    ServeStaticModule.forRoot({
+    rootPath: join(__dirname, '..', 'uploads_gallerey'),
+    serveRoot: '/uploads_gallerey/',
+  }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'preview'), 
+      serveRoot: '/preview',  
     }),
   ],
   controllers: [MailerController, FilesController, PpoController],
