@@ -57,20 +57,7 @@ export class NewsService {
 
         return news;
     }
-    // private extractTextFromParagraphs(content: string): string {
-    //     const paragraphRegex = /<p[^>]*>(.*?)<\/p>/g;
-    //     let match: RegExpExecArray | null;
-    //     let paragraphText = '';
-    //     while ((match = paragraphRegex.exec(content)) !== null) {
-    //         paragraphText += match[1];
-    //     }
-    //     paragraphText = paragraphText.replace(/&[^;]+;/g, '');
-    //     paragraphText = paragraphText.replace(/[\u{1F600}-\u{1F6FF}]/gu, '');
-    //     let preview = paragraphText.trim().substring(0, 100);
-    //     preview += '...';
-
-    //     return preview;
-    // }
+  
     private extractTextFromParagraphs(content: string): string {
         const paragraphRegex = /<p[^>]*>(.*?)<\/p>/g;
         let match: RegExpExecArray | null;

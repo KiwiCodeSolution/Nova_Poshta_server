@@ -57,20 +57,7 @@ export class GallereyService {
 
         return gallerey;
     }
-    // private extractTextFromParagraphs(content: string): string {
-    //     const paragraphRegex = /<p[^>]*>(.*?)<\/p>/g;
-    //     let match: RegExpExecArray | null;
-    //     let paragraphText = '';
-    //     while ((match = paragraphRegex.exec(content)) !== null) {
-    //         paragraphText += match[1];
-    //     }
-    //     paragraphText = paragraphText.replace(/&[^;]+;/g, '');
-    //     paragraphText = paragraphText.replace(/[\u{1F600}-\u{1F6FF}]/gu, '');
-    //     let preview = paragraphText.trim().substring(0, 100);
-    //     preview += '...';
-
-    //     return preview;
-    // }
+   
     private extractTextFromParagraphs(content: string): string {
         const paragraphRegex = /<p[^>]*>(.*?)<\/p>/g;
         let match: RegExpExecArray | null;
@@ -90,54 +77,7 @@ export class GallereyService {
     }
     
 
-    // async create(createGallereyDto: CreateGallereyDto): Promise<Gallerey> {
-    //     const slug = this.generateSlug(createGallereyDto.title);
-
-    //     const existingGallerey = await this.gallereyModel.findOne({ slug });
-    //     if (existingGallerey) {
-    //         throw new ConflictException(`Новина з ярликом "${slug}" вже існує`);
-    //     }
-
-    //     let { content } = createGallereyDto;
-
-    //     const imageRegex = /<img.*?src="([^"]+)".*?>/g;
-    //     const timeRegex = /<time datetime="([^"]+)">/;
-    //     let match: any[];
-    //     const imagePromises = [];
-
-    //     while ((match = imageRegex.exec(content)) !== null) {
-    //         const imageUrl = match[1];
-
-    //         if (imageUrl.startsWith('data:image/')) {
-    //             imagePromises.push(this.imageService.saveBase64Image(imageUrl, createGallereyDto.title));
-    //         } else {
-    //             imagePromises.push(this.imageService.downloadImage(imageUrl, createGallereyDto.title));
-    //         }
-    //     }
-
-    //     const savedImageObjects = await Promise.all(imagePromises);
-
-    //     savedImageObjects.forEach((imageObj) => {
-    //         const escapedUrl = imageObj.originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    //         content = content.replace(new RegExp(escapedUrl, 'g'), imageObj.url);
-    //     });
-
-    //     createGallereyDto.content = content;
-    //     createGallereyDto.images = savedImageObjects.map(image => image.url);
-
-    //     const timeMatch = content.match(timeRegex);
-    //     const datetime = timeMatch ? new Date(timeMatch[1]) : null;
-
-    //     const previewText = this.extractTextFromParagraphs(content);
-    //     const gallerey = new this.gallereyModel({
-    //         ...createGallereyDto,
-    //         slug,
-    //         previewText,
-    //         datetime,
-    //     });
-
-    //     return gallerey.save();
-    // }
+  
     async create(createGallereyDto: CreateGallereyDto): Promise<Gallerey> {
         const slug = this.generateSlug(createGallereyDto.title);
         const baseUrl = this.configService.baseUrl;
