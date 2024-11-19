@@ -6,20 +6,17 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { GallereyService } from './gallerey.service';
 import { CreateGallereyDto } from './dto/createGallerey.dto';
 import { UpdateGallereyDto } from './dto/updateGallerey.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('gallerey')
 
 export class GallereyController {
   constructor(private readonly gallereyService: GallereyService) { }
-
-  // @Post('upload-preview')
-  // async uploadPreviewImage(@Body() body: { previewImage: string, title: string }) {
-  //   return this.newsService.uploadPreviewImage(body.previewImage, body.title);
-  // }
 
   @Get('id/:id')
   async findById(@Param('id') id: string) {
@@ -32,6 +29,7 @@ export class GallereyController {
   }
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() createGallereyDto: CreateGallereyDto) {
     return this.gallereyService.create(createGallereyDto);
   }
@@ -49,11 +47,13 @@ export class GallereyController {
 
 
   @Put(':slug')
+  @UseGuards(AuthGuard)
   update(@Param('slug') slug: string, @Body() updateGallereyDto: UpdateGallereyDto) {
     return this.gallereyService.update(slug, updateGallereyDto);
   }
 
   @Delete(':slug/:userId')
+  @UseGuards(AuthGuard)
   delete(@Param('slug') slug: string, @Param('userId') userId: string) {
     return this.gallereyService.delete(slug, userId);
   }

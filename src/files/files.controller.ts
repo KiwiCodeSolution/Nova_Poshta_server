@@ -1,10 +1,11 @@
-import { Controller, Post, UseInterceptors, UploadedFile, Delete, Param, HttpException, HttpStatus, Get, Res } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, Delete, Param, HttpException, HttpStatus, Get, Res, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FilesService } from './files.service';
 import { Express } from 'express';
 import { join } from 'path';
 import { Response } from 'express';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 // http://localhost:5000/api/files/qwerty.jpeg
 // http://localhost:5000/api/files/1.pdf
@@ -15,6 +16,7 @@ import { Response } from 'express';
 export class FilesController {
   constructor(private readonly filesService: FilesService) { }
   @Post('upload')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -55,6 +57,7 @@ export class FilesController {
   }
 
   @Delete('delete/:filename')
+  @UseGuards(AuthGuard)
   async deleteFile(@Param('filename') filename: string) {
     return this.filesService.deleteFile(filename);
   }
