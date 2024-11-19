@@ -88,54 +88,55 @@ export class NewsService {
     
         return preview;
     }
-    
-
     async create(createNewsDto: CreateNewsDto): Promise<News> {
         const slug = this.generateSlug(createNewsDto.title);
-
+        const baseUrl = this.configService.baseUrl;
+    
         const existingNews = await this.newsModel.findOne({ slug });
         if (existingNews) {
             throw new ConflictException(`Новина з ярликом "${slug}" вже існує`);
         }
-
+    
         let { content } = createNewsDto;
-
+    
         const imageRegex = /<img.*?src="([^"]+)".*?>/g;
         const timeRegex = /<time datetime="([^"]+)">/;
         let match: any[];
         const imagePromises = [];
-
+    
         while ((match = imageRegex.exec(content)) !== null) {
             const imageUrl = match[1];
-
+    
             if (imageUrl.startsWith('data:image/')) {
                 imagePromises.push(this.imageService.saveBase64Image(imageUrl, createNewsDto.title));
             } else {
                 imagePromises.push(this.imageService.downloadImage(imageUrl, createNewsDto.title));
             }
         }
-
+    
         const savedImageObjects = await Promise.all(imagePromises);
-
+    
         savedImageObjects.forEach((imageObj) => {
             const escapedUrl = imageObj.originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             content = content.replace(new RegExp(escapedUrl, 'g'), imageObj.url);
         });
-
         createNewsDto.content = content;
-        createNewsDto.images = savedImageObjects.map(image => image.url);
-
+        createNewsDto.images = savedImageObjects.map(image => image.url); 
         const timeMatch = content.match(timeRegex);
         const datetime = timeMatch ? new Date(timeMatch[1]) : null;
-
         const previewText = this.extractTextFromParagraphs(content);
+    
+        
+        const firstImageMatch = content.match(/<img.*?src="([^"]+)".*?>/);
+        const previewImg = firstImageMatch ? firstImageMatch[1] : `src="/preview/qwerty.jpeg"`;
+    
         const news = new this.newsModel({
             ...createNewsDto,
             slug,
             previewText,
             datetime,
+            previewImg, 
         });
-
         return news.save();
     }
 
