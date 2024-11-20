@@ -15,20 +15,18 @@ export class MailerController {
 
   @Post('membership-request')
   async sendMembershipRequest(@Body() dto: MembershipRequestDto) {
-    const { firstName, lastName, phone, email } = dto;
+    const {  phone, region } = dto;
 
-    const subject = 'Новая заявка на вступление в профсоюз';
-    const text = `Имя: ${firstName}\nФамилия: ${lastName || 'Не указана'}\nТелефон: ${phone}\nEmail: ${email}`;
+    const subject = 'Нова заявка на вступ до профсоюза';
+    const text = `Имя: ${region}\nТелефон: ${phone}`;
     const html = `
-      <p>Имя: ${firstName}</p>
-      <p>Фамилия: ${lastName || 'Не указана'}</p>
+      <p>Регіон: ${region}</p>
       <p>Телефон: ${phone}</p>
-      <p>Email: ${email}</p>
     `;
 
     return this.mailerService.sendMail(
-      // 'taar12sh@gmail.com',
-      'E.a.poduzova@gmail.com',
+      'taar12sh@gmail.com',
+      // 'E.a.poduzova@gmail.com',
       subject,
       text,
       html,

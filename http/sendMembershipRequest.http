@@ -2,8 +2,7 @@ POST http://localhost:5000/api/email/membership-request
 Content-Type: application/json
 
 {
-  "firstName": "возьмите меня пожайлуста в профсоюз ",
-  "lastName": "очень",
-  "phone": "+1234567890",
-  "email": "iv@example.com"
+  "region": "апртапрапрапрапр ",
+  "phone": "+1234567890"
+
 }
