@@ -6,21 +6,17 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/createNews.dto';
 import { UpdateNewsDto } from './dto/updateNews.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('news')
 
 export class NewsController {
   constructor(private readonly newsService: NewsService) { }
-
-  // @Post('upload-preview')
-  // async uploadPreviewImage(@Body() body: { previewImage: string, title: string }) {
-  //   return this.newsService.uploadPreviewImage(body.previewImage, body.title);
-  // }
-
 
   @Get('id/:id')
   async findById(@Param('id') id: string) {
@@ -33,6 +29,7 @@ export class NewsController {
   }
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() createNewsDto: CreateNewsDto) {
     return this.newsService.create(createNewsDto);
   }
@@ -50,14 +47,15 @@ export class NewsController {
 
 
   @Put(':slug')
+  @UseGuards(AuthGuard)
   update(@Param('slug') slug: string, @Body() updateNewsDto: UpdateNewsDto) {
     return this.newsService.update(slug, updateNewsDto);
   }
 
   @Delete(':slug/:userId')
+  @UseGuards(AuthGuard)
   delete(@Param('slug') slug: string, @Param('userId') userId: string) {
     return this.newsService.delete(slug, userId);
   }
-
 
 }
