@@ -2,8 +2,8 @@ POST http://localhost:5000/api/email/send HTTP/1.1
 Content-Type: application/json
 
 {
-   "to" : "taar12sh@gmail.com",
+   "to" : "evgenija.borisjuk@gmail.com",
    "subject": "Hello from Node.js",
    "text":"This is a test email using NodeMailer!",
-   "html": "<b>This is a test email using NodeMailer! nest JS scuko</b>"
+   "html": "<p>Нова новина. Перевіряємо превью тексту та картинки.</p>\n<p>&nbsp;</p>\n<p><img src=\"http://localhost:5000/uploads/nova-novina-za-19.11.2024-roku-2024111921142675-19.jpg\" alt=\"\" width=\"473\" height=\"511\"></p>"
 }

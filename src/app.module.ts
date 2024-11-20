@@ -19,7 +19,9 @@ import { GallereyModule } from './gallerey/gallerey.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/nova_poshta'),
+    MongooseModule.forRoot(
+      'mongodb+srv://ea_admin:123456_ea_admin@cluster0.kkd7c.mongodb.net/',
+    ),
     UserModule,
     PpoModule,
     AuthModule,
@@ -34,12 +36,12 @@ import { GallereyModule } from './gallerey/gallerey.module';
       serveRoot: '/uploads/',
     }),
     ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'uploads_gallerey'),
-    serveRoot: '/uploads_gallerey/',
-  }),
+      rootPath: join(__dirname, '..', 'uploads_gallerey'),
+      serveRoot: '/uploads_gallerey/',
+    }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'preview'), 
-      serveRoot: '/preview',  
+      rootPath: join(__dirname, '..', 'preview'),
+      serveRoot: '/preview',
     }),
   ],
   controllers: [MailerController, FilesController, PpoController],

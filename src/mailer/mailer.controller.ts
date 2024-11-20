@@ -5,7 +5,7 @@ import { MembershipRequestDto } from './dto/Membersmembership_request.dto';
 
 @Controller('email')
 export class MailerController {
-  constructor(private readonly mailerService: MailerService) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   @Post('send')
   async sendEmail(@Body() dto: MailerDto) {
@@ -15,7 +15,7 @@ export class MailerController {
 
   @Post('membership-request')
   async sendMembershipRequest(@Body() dto: MembershipRequestDto) {
-    const {  phone, region } = dto;
+    const { phone, region } = dto;
 
     const subject = 'Нова заявка на вступ до профсоюза';
     const text = `Имя: ${region}\nТелефон: ${phone}`;
@@ -25,8 +25,9 @@ export class MailerController {
     `;
 
     return this.mailerService.sendMail(
-      'taar12sh@gmail.com',
-      // 'E.a.poduzova@gmail.com',
+      // 'taar12sh@gmail.com',
+      'e.a.poduzova@gmail.com',
+
       subject,
       text,
       html,
