@@ -9,19 +9,17 @@ import { LoggerService } from 'src/utils/logging/logger.service';
 import { slugify } from 'transliteration';
 import { ImageService } from './image.service';
 import { ConfigService } from './config';
-import { PpoService } from 'src/ppo/ppo.service';
-import { Ppo, PpoSchema } from 'src/ppo/schemas/ppo.schema';
+
 
 @Injectable()
 export class GallereyService {
     constructor(
         @InjectModel(Gallerey.name) private gallereyModel: Model<Gallerey>,
-        @InjectModel(Ppo.name) private ppoModel: Model<Ppo>,
         private readonly loggerService: LoggerService,
         private readonly imageService: ImageService,
         private readonly configService: ConfigService,
-        private readonly ppoService: PpoService,
-
+       
+       
     ) { }
     async uploadPreviewImage(previewImage: string, title: string) {
         const previewImageObj = await this.imageService.savePreviewImage(previewImage, title);
@@ -133,75 +131,6 @@ export class GallereyService {
     
         return gallerey.save();
     }
-    
-
-    async searchGallerey(searchParams: any): Promise<any[]> {
-        const { query, date, topic } = searchParams;
-        const logger = new Logger('GallereyService');
-
-        const gallereyFilters: any = {};
-        if (query) {
-            gallereyFilters.$or = [
-                { title: { $regex: query, $options: 'i' } },
-                { content: { $regex: query, $options: 'i' } },
-                { sections: { $regex: query, $options: 'i' } },
-            ];
-        }
-        if (date) {
-            const startDate = new Date(date);
-            const endDate = new Date(date);
-            endDate.setHours(23, 59, 59, 999);
-            gallereyFilters.createdAt = { $gte: startDate, $lte: endDate };
-        }
-        if (topic) {
-            gallereyFilters.sections = { $in: [topic] };
-        }
-
-        logger.log(`Gallerey Filters: ${JSON.stringify(gallereyFilters)}`);
-
-        const gallereyResults = await this.gallereyModel.find(gallereyFilters).exec();
-        logger.log(`Found gallerey results: ${gallereyResults.length}`);
-        if (gallereyResults.length > 0) {
-            logger.log(`First Gallerey result: ${JSON.stringify(gallereyResults[0])}`);
-        }
-
-        const ppoFilters: any = {};
-        if (query) {
-            ppoFilters.$or = [
-                { region: { $regex: query.trim(), $options: 'i' } },
-                { region_name: { $regex: query.trim(), $options: 'i' } },
-                { director: { $regex: query.trim(), $options: 'i' } },
-                { position: { $regex: query.trim(), $options: 'i' } },
-                { email: { $regex: query.trim(), $options: 'i' } },
-                { phone: { $regex: query.trim(), $options: 'i' } },
-                { admission_address: { $regex: query.trim(), $options: 'i' } },
-                { application_address: { $regex: query.trim(), $options: 'i' } },
-                { link_news: { $regex: query.trim(), $options: 'i' } },
-                { link: { $regex: query.trim(), $options: 'i' } },
-                { committee: { $regex: query.trim(), $options: 'i' } },
-            ];
-        }
-
-        try {
-            const ppoResults = await this.ppoModel.find(ppoFilters).exec();
-            if (ppoResults.length > 0) {
-                logger.log(`First PPO result: ${JSON.stringify(ppoResults[0])}`);
-            }
-            return [...gallereyResults, ...ppoResults];
-        } catch (error) {
-
-            logger.error(`Error while searching PPO: ${error.message}`);
-            throw error;
-        }
-    }
-
-    async findWithFilters(filters: any): Promise<any[]> {
-        console.log('Applied Filters:', filters);
-        const results = await this.ppoModel.find(filters).exec();
-        return results;
-    }
-
-
 
     async findAll(): Promise<Gallerey[]> {
         const gallereyArray = await this.gallereyModel.find().exec();

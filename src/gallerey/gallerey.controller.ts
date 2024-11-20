@@ -26,10 +26,6 @@ export class GallereyController {
     return this.gallereyService.findById(id);
   }
 
-  @Post('search')
-  searchGallerey(@Body() searchParams: any) {
-    return this.gallereyService.searchGallerey(searchParams);
-  }
 
   @Post()
   create(@Body() createGallereyDto: CreateGallereyDto) {

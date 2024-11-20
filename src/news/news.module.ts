@@ -7,12 +7,16 @@ import { LoggerService } from 'src/utils/logging/logger.service';
 import { ImageService } from './image.service';
 import { ConfigService } from './config';
 import { PpoModule } from 'src/ppo/ppo.module';
+import { GallereyModule } from '../gallerey/gallerey.module';
+import { GallereyService } from 'src/gallerey/gallerey.service';
 
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: News.name, schema: NewsSchema }]),
     PpoModule,
+    GallereyModule
+    
   ],
   controllers: [NewsController],
   providers: [NewsService, LoggerService, ImageService, ConfigService],

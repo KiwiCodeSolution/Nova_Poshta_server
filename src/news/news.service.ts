@@ -9,19 +9,22 @@ import { LoggerService } from 'src/utils/logging/logger.service';
 import { slugify } from 'transliteration';
 import { ImageService } from './image.service';
 import { ConfigService } from './config';
-import { PpoService } from 'src/ppo/ppo.service';
-import { Ppo, PpoSchema } from 'src/ppo/schemas/ppo.schema';
+import { PpoService } from '../ppo/ppo.service';
+import { Ppo } from 'src/ppo/schemas/ppo.schema';
+import { Gallerey } from '../gallerey/schemas/gallerey.schema';
+
 
 @Injectable()
 export class NewsService {
     constructor(
         @InjectModel(News.name) private newsModel: Model<News>,
         @InjectModel(Ppo.name) private ppoModel: Model<Ppo>,
+        @InjectModel(Gallerey.name) private galleryModel: Model<Gallerey>,
         private readonly loggerService: LoggerService,
         private readonly imageService: ImageService,
         private readonly configService: ConfigService,
         private readonly ppoService: PpoService,
-
+      
     ) { }
     async uploadPreviewImage(previewImage: string, title: string) {
         const previewImageObj = await this.imageService.savePreviewImage(previewImage, title);
@@ -127,11 +130,73 @@ export class NewsService {
         return news.save();
     }
 
+    // async searchNews(searchParams: any): Promise<any[]> {
+    //     const { query, date, topic } = searchParams;
+    //     const logger = new Logger('NewsService');
+
+    //     const newsFilters: any = {};
+    //     if (query) {
+    //         newsFilters.$or = [
+    //             { title: { $regex: query, $options: 'i' } },
+    //             { content: { $regex: query, $options: 'i' } },
+    //             { sections: { $regex: query, $options: 'i' } },
+    //         ];
+    //     }
+    //     if (date) {
+    //         const startDate = new Date(date);
+    //         const endDate = new Date(date);
+    //         endDate.setHours(23, 59, 59, 999);
+    //         newsFilters.createdAt = { $gte: startDate, $lte: endDate };
+    //     }
+    //     if (topic) {
+    //         newsFilters.sections = { $in: [topic] };
+    //     }
+
+    //     logger.log(`News Filters: ${JSON.stringify(newsFilters)}`);
+
+    //     const newsResults = await this.newsModel.find(newsFilters).exec();
+    //     logger.log(`Found News results: ${newsResults.length}`);
+    //     if (newsResults.length > 0) {
+    //         logger.log(`First News result: ${JSON.stringify(newsResults[0])}`);
+    //     }
+
+    //     const ppoFilters: any = {};
+    //     if (query) {
+    //         ppoFilters.$or = [
+    //             { region: { $regex: query.trim(), $options: 'i' } },
+    //             { region_name: { $regex: query.trim(), $options: 'i' } },
+    //             { director: { $regex: query.trim(), $options: 'i' } },
+    //             { position: { $regex: query.trim(), $options: 'i' } },
+    //             { email: { $regex: query.trim(), $options: 'i' } },
+    //             { phone: { $regex: query.trim(), $options: 'i' } },
+    //             { admission_address: { $regex: query.trim(), $options: 'i' } },
+    //             { application_address: { $regex: query.trim(), $options: 'i' } },
+    //             { link_news: { $regex: query.trim(), $options: 'i' } },
+    //             { link: { $regex: query.trim(), $options: 'i' } },
+    //             { committee: { $regex: query.trim(), $options: 'i' } },
+    //         ];
+    //     }
+
+    //     try {
+    //         const ppoResults = await this.ppoModel.find(ppoFilters).exec();
+    //         if (ppoResults.length > 0) {
+    //             logger.log(`First PPO result: ${JSON.stringify(ppoResults[0])}`);
+    //         }
+    //         return [...newsResults, ...ppoResults];
+    //     } catch (error) {
+
+    //         logger.error(`Error while searching PPO: ${error.message}`);
+    //         throw error;
+    //     }
+    // }
+
     async searchNews(searchParams: any): Promise<any[]> {
         const { query, date, topic } = searchParams;
         const logger = new Logger('NewsService');
-
         const newsFilters: any = {};
+        const ppoFilters: any = {};
+        const galleryFilters: any = {};
+       
         if (query) {
             newsFilters.$or = [
                 { title: { $regex: query, $options: 'i' } },
@@ -148,16 +213,7 @@ export class NewsService {
         if (topic) {
             newsFilters.sections = { $in: [topic] };
         }
-
-        logger.log(`News Filters: ${JSON.stringify(newsFilters)}`);
-
-        const newsResults = await this.newsModel.find(newsFilters).exec();
-        logger.log(`Found News results: ${newsResults.length}`);
-        if (newsResults.length > 0) {
-            logger.log(`First News result: ${JSON.stringify(newsResults[0])}`);
-        }
-
-        const ppoFilters: any = {};
+        
         if (query) {
             ppoFilters.$or = [
                 { region: { $regex: query.trim(), $options: 'i' } },
@@ -173,19 +229,46 @@ export class NewsService {
                 { committee: { $regex: query.trim(), $options: 'i' } },
             ];
         }
-
+    
+        
+        if (query) {
+            galleryFilters.$or = [
+                { title: { $regex: query, $options: 'i' } },
+                { content: { $regex: query, $options: 'i' } },
+                { sections: { $regex: query, $options: 'i' } },
+                { author: { $regex: query, $options: 'i' } },
+            ];
+        }
+        if (date) {
+            const startDate = new Date(date);
+            const endDate = new Date(date);
+            endDate.setHours(23, 59, 59, 999);
+            galleryFilters.datetime = { $gte: startDate, $lte: endDate };
+        }
+        if (topic) {
+            galleryFilters.sections = { $in: [topic] };
+        }
+    
         try {
-            const ppoResults = await this.ppoModel.find(ppoFilters).exec();
-            if (ppoResults.length > 0) {
-                logger.log(`First PPO result: ${JSON.stringify(ppoResults[0])}`);
-            }
-            return [...newsResults, ...ppoResults];
+            // Поиск в коллекциях
+            const [newsResults, ppoResults, galleryResults] = await Promise.all([
+                this.newsModel.find(newsFilters).exec(),
+                this.ppoModel.find(ppoFilters).exec(),
+                this.galleryModel.find(galleryFilters).exec(),
+            ]);
+    
+            logger.log(`Found News results: ${newsResults.length}`);
+            logger.log(`Found PPO results: ${ppoResults.length}`);
+            logger.log(`Found Gallery results: ${galleryResults.length}`);
+    
+            // Возврат объединённых результатов
+            return [...newsResults, ...ppoResults, ...galleryResults];
         } catch (error) {
-
-            logger.error(`Error while searching PPO: ${error.message}`);
+            logger.error(`Error during search: ${error.message}`);
             throw error;
         }
     }
+    
 
     async findWithFilters(filters: any): Promise<any[]> {
         console.log('Applied Filters:', filters);

@@ -6,15 +6,17 @@ import {Gallerey, GallereySchema } from './schemas/gallerey.schema';
 import { LoggerService } from 'src/utils/logging/logger.service';
 import { ImageService } from './image.service';
 import { ConfigService } from './config';
-import { PpoModule } from 'src/ppo/ppo.module';
+
 
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Gallerey.name, schema:GallereySchema }]),
-    PpoModule,
+    MongooseModule.forFeature([{ name: Gallerey.name, schema: GallereySchema }]), 
+    
   ],
   controllers: [GallereyController],
   providers: [GallereyService, LoggerService, ImageService, ConfigService],
-})
+  exports: [GallereyService, MongooseModule],
+}
+)
 export class GallereyModule { }
