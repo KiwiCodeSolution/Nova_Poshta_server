@@ -130,66 +130,6 @@ export class NewsService {
         return news.save();
     }
 
-    // async searchNews(searchParams: any): Promise<any[]> {
-    //     const { query, date, topic } = searchParams;
-    //     const logger = new Logger('NewsService');
-
-    //     const newsFilters: any = {};
-    //     if (query) {
-    //         newsFilters.$or = [
-    //             { title: { $regex: query, $options: 'i' } },
-    //             { content: { $regex: query, $options: 'i' } },
-    //             { sections: { $regex: query, $options: 'i' } },
-    //         ];
-    //     }
-    //     if (date) {
-    //         const startDate = new Date(date);
-    //         const endDate = new Date(date);
-    //         endDate.setHours(23, 59, 59, 999);
-    //         newsFilters.createdAt = { $gte: startDate, $lte: endDate };
-    //     }
-    //     if (topic) {
-    //         newsFilters.sections = { $in: [topic] };
-    //     }
-
-    //     logger.log(`News Filters: ${JSON.stringify(newsFilters)}`);
-
-    //     const newsResults = await this.newsModel.find(newsFilters).exec();
-    //     logger.log(`Found News results: ${newsResults.length}`);
-    //     if (newsResults.length > 0) {
-    //         logger.log(`First News result: ${JSON.stringify(newsResults[0])}`);
-    //     }
-
-    //     const ppoFilters: any = {};
-    //     if (query) {
-    //         ppoFilters.$or = [
-    //             { region: { $regex: query.trim(), $options: 'i' } },
-    //             { region_name: { $regex: query.trim(), $options: 'i' } },
-    //             { director: { $regex: query.trim(), $options: 'i' } },
-    //             { position: { $regex: query.trim(), $options: 'i' } },
-    //             { email: { $regex: query.trim(), $options: 'i' } },
-    //             { phone: { $regex: query.trim(), $options: 'i' } },
-    //             { admission_address: { $regex: query.trim(), $options: 'i' } },
-    //             { application_address: { $regex: query.trim(), $options: 'i' } },
-    //             { link_news: { $regex: query.trim(), $options: 'i' } },
-    //             { link: { $regex: query.trim(), $options: 'i' } },
-    //             { committee: { $regex: query.trim(), $options: 'i' } },
-    //         ];
-    //     }
-
-    //     try {
-    //         const ppoResults = await this.ppoModel.find(ppoFilters).exec();
-    //         if (ppoResults.length > 0) {
-    //             logger.log(`First PPO result: ${JSON.stringify(ppoResults[0])}`);
-    //         }
-    //         return [...newsResults, ...ppoResults];
-    //     } catch (error) {
-
-    //         logger.error(`Error while searching PPO: ${error.message}`);
-    //         throw error;
-    //     }
-    // }
-
     async searchNews(searchParams: any): Promise<any[]> {
         const { query, date, topic } = searchParams;
         const logger = new Logger('NewsService');
@@ -289,11 +229,27 @@ export class NewsService {
         return this.addBaseUrlToImages(news);
     }
 
+    // async update(slug: string, updateNewsDto: UpdateNewsDto): Promise<News> {
+    //     const updatedNews = await this.newsModel
+    //         .findOneAndUpdate({ slug }, updateNewsDto, { new: true })
+    //         .exec();
+    //     if (!updatedNews) throw new NotFoundException('News not found');
+    //     return updatedNews;
+    // }
     async update(slug: string, updateNewsDto: UpdateNewsDto): Promise<News> {
+        if (updateNewsDto.content) {
+            const previewText = this.extractTextFromParagraphs(updateNewsDto.content);
+            updateNewsDto.previewText = previewText; 
+        }
+    
         const updatedNews = await this.newsModel
             .findOneAndUpdate({ slug }, updateNewsDto, { new: true })
             .exec();
-        if (!updatedNews) throw new NotFoundException('News not found');
+            
+        if (!updatedNews) {
+            throw new NotFoundException('News not found');
+        }
+    
         return updatedNews;
     }
 

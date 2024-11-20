@@ -14,6 +14,11 @@ export class UpdateNewsDto {
   slug: string;
 
   @IsOptional()
+  @IsString()
+  previewText: string;
+  
+
+  @IsOptional()
   @IsArray()
   metaTags?: string[];
 

@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus, Put } from '@
 import { SubscriptionService } from './subscriptions.service';
 import { CreateSubscriptionDto } from './dto/create_subscription.dto';
 import { LogSubscriptionDto } from './dto/log_subscription.dto';
+import { UpdateSubscriptDto } from './dto/update_subscript.dto';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -13,12 +14,13 @@ export class SubscriptionController {
   }
 
   @Put()
-  update() {
-
+  async update(@Body() updateSubscriptionDto: UpdateSubscriptDto) {
+    return this.subscriptionService.updateSubscription(updateSubscriptionDto);
   }
-
-  @Get('confirm')
-  async confirm(@Query('email') email: string) {
+  
+  @Post('confirm')
+  async confirm(@Body() body: { email: string }) {
+    const { email } = body;
     return this.subscriptionService.confirmSubscription(email);
   }
 

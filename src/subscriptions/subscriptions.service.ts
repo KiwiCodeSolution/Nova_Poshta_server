@@ -1,16 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Subscription } from './schemas/subscription.schema';
 import { CreateSubscriptionDto } from './dto/create_subscription.dto';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailerService } from '../mailer/mailer.service';
 import { LoggerService } from 'src/utils/logging/logger.service';
+import { UpdateSubscriptDto } from './dto/update_subscript.dto';
 
 @Injectable()
 export class SubscriptionService {
     constructor(
         @InjectModel(Subscription.name) private subscriptionModel: Model<Subscription>,
-        private mailerService: MailerService,
+        private readonly mailerService: MailerService,
         private readonly loggerService: LoggerService
     ) { }
 
@@ -21,29 +22,48 @@ export class SubscriptionService {
         return newSubscription.save();
     }
 
-    async updateSubscript() {
+    
 
-    }
+      async updateSubscription(updateSubscriptionDto: UpdateSubscriptDto): Promise<Subscription> {
+        const { email, subscribed } = updateSubscriptionDto;
+    
+        const subscription = await this.subscriptionModel.findOne({ email });
+        if (!subscription) {
+          throw new HttpException('Подписка не найдена', HttpStatus.NOT_FOUND);
+        }
+    
+        subscription.subscribed = subscribed;
+        return subscription.save();
+      }
 
+
+    // async confirmSubscription(email: string): Promise<Subscription> {
+    //     const subscription = await this.subscriptionModel.findOne({ email });
+
+    //     if (!subscription) {
+    //         throw new Error('Subscription not found');
+    //     }
+    //     subscription.subscribed = true;
+    //     return subscription.save();
+    // }
 
     async confirmSubscription(email: string): Promise<Subscription> {
         const subscription = await this.subscriptionModel.findOne({ email });
-
         if (!subscription) {
-            throw new Error('Subscription not found');
+            throw new HttpException('Подписка не найдена', HttpStatus.NOT_FOUND);
         }
-        subscription.subscribed = true;
+        subscription.subscribed = !subscription.subscribed;
         return subscription.save();
     }
-
     private async sendConfirmationEmail(email: string) {
         const confirmationLink = `http://localhost:3000/subscription/confirm?email=${email}`;
-
-        await this.mailerService.sendMail({
-            to: email,
-            subject: 'Подтверждение подписки на новости',
-            text: `Для подтверждения подписки перейдите по ссылке: ${confirmationLink}`,
-        });
+        console.log(email);
+        await this.mailerService.sendMail(
+            email,
+            'Подтверждение подписки на новости',
+            `Для подтверждения подписки перейдите по ссылке: ${confirmationLink}`,
+            `<p>Для подтверждения подписки перейдите по ссылке: <a href="${confirmationLink}">${confirmationLink}</a></p>`,
+        );
     }
 
     public async logSubscriptionToFile(name: string, email: string): Promise<void> {
