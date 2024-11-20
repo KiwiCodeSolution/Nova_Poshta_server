@@ -11,34 +11,62 @@ export class SubscriptionService {
     constructor(
         @InjectModel(Subscription.name) private subscriptionModel: Model<Subscription>,
         private mailerService: MailerService,
-        private readonly loggerService: LoggerService
+        private readonly loggerService: LoggerService,
+        
     ) { }
 
     async createSubscription(createSubscriptionDto: CreateSubscriptionDto): Promise<Subscription> {
+        const existingSubscription = await this.subscriptionModel.findOne({ email: createSubscriptionDto.email });
+    
+        if (existingSubscription) {
+            throw new Error('Подписка с таким email уже существует');
+        }
+    
         const newSubscription = new this.subscriptionModel(createSubscriptionDto);
         this.logSubscriptionToFile(newSubscription.name, newSubscription.email);
         await this.sendConfirmationEmail(newSubscription.email);
         return newSubscription.save();
     }
 
-    async updateSubscript() {
 
-    }
+    // async confirmSubscription(email: string): Promise<Subscription> {
+    //     const subscription = await this.subscriptionModel.findOne({ email });
 
-
-    async confirmSubscription(email: string): Promise<Subscription> {
+    //     if (!subscription) {
+    //         throw new Error('Subscription not found');
+    //     }
+    //     subscription.subscribed = true;
+    //     return subscription.save();
+    //     console.log(subscription);
+    //     return subscription ;
+    // }
+    async confirmSubscription(email: string): Promise<Subscription | string> {
         const subscription = await this.subscriptionModel.findOne({ email });
-
-        if (!subscription) {
-            throw new Error('Subscription not found');
+    
+        if (subscription) {
+            // Если подписка существует, удаляем её
+            await this.subscriptionModel.deleteOne({ email });
+            console.log(`Подписка для ${email} удалена.`);
+            return `Подписка для ${email} была удалена.`;
+        } else {
+            // Если подписка не существует, создаём новую
+            const newSubscription = new this.subscriptionModel({
+                email,
+                name: "Новый подписчик", // Замените на реальное имя или параметр
+                subscribed: true,
+                array_subscripts: [], // Замените на данные по умолчанию
+            });
+            await newSubscription.save();
+            console.log(`Подписка для ${email} создана.`);
+            return newSubscription;
         }
-        subscription.subscribed = true;
-        return subscription.save();
     }
+    
 
     private async sendConfirmationEmail(email: string) {
+        
         const confirmationLink = `http://localhost:3000/subscription/confirm?email=${email}`;
-
+console.log(email);
         await this.mailerService.sendMail({
             to: email,
             subject: 'Подтверждение подписки на новости',

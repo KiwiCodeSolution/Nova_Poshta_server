@@ -1,0 +1,9 @@
+POST http://localhost:5000/api/subscription HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Иван Иванов",
+  "email": "taar12sh@gmail.com",
+  "subscribed": false,
+  "array_subscripts": ["qwertyu"]
+}
