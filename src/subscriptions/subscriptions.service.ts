@@ -38,6 +38,7 @@ export class SubscriptionService {
 
     private async sendConfirmationEmail(email: string) {
         const confirmationLink = `http://localhost:3000/subscription/confirm?email=${email}`;
+        // const confirmationLink = `https://kiwicode.tech/subscription/confirm?email=${email}`;
 
         await this.mailerService.sendMail({
             to: email,
