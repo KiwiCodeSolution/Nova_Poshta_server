@@ -14,5 +14,6 @@ import { MailModule } from 'src/mailer/mailer.module';
   ],
   controllers: [SubscriptionController],
   providers: [SubscriptionService , LoggerService],
+  exports: [MongooseModule],
 })
 export class SubscriptionsModule {}

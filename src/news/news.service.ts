@@ -12,7 +12,8 @@ import { ConfigService } from './config';
 import { PpoService } from '../ppo/ppo.service';
 import { Ppo } from 'src/ppo/schemas/ppo.schema';
 import { Gallerey } from '../gallerey/schemas/gallerey.schema';
-
+import { Subscription } from '../subscriptions/schemas/subscription.schema'
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class NewsService {
@@ -20,11 +21,13 @@ export class NewsService {
         @InjectModel(News.name) private newsModel: Model<News>,
         @InjectModel(Ppo.name) private ppoModel: Model<Ppo>,
         @InjectModel(Gallerey.name) private galleryModel: Model<Gallerey>,
+        @InjectModel(Subscription.name) private subscriptionModel: Model<Subscription>,
+        private readonly mailerService: MailerService,
         private readonly loggerService: LoggerService,
         private readonly imageService: ImageService,
         private readonly configService: ConfigService,
         private readonly ppoService: PpoService,
-      
+
     ) { }
     async uploadPreviewImage(previewImage: string, title: string) {
         const previewImageObj = await this.imageService.savePreviewImage(previewImage, title);
@@ -60,75 +63,154 @@ export class NewsService {
 
         return news;
     }
-  
+
     private extractTextFromParagraphs(content: string): string {
         const paragraphRegex = /<p[^>]*>(.*?)<\/p>/g;
         let match: RegExpExecArray | null;
         let paragraphText = '';
-    
+
         while ((match = paragraphRegex.exec(content)) !== null) {
             paragraphText += match[1];
         }
-        
+
         paragraphText = paragraphText.replace(/<\/?[^>]+(>|$)/g, '');
         paragraphText = paragraphText.replace(/&[^;]+;/g, '');
         paragraphText = paragraphText.replace(/[\u{1F600}-\u{1F6FF}]/gu, '');
         let preview = paragraphText.trim().substring(0, 100);
         preview += '...';
-    
+
         return preview;
     }
+    // async create(createNewsDto: CreateNewsDto): Promise<News> {
+    //     const slug = this.generateSlug(createNewsDto.title);
+    //     const baseUrl = this.configService.baseUrl;
+
+    //     const existingNews = await this.newsModel.findOne({ slug });
+    //     if (existingNews) {
+    //         throw new ConflictException(`Новина з ярликом "${slug}" вже існує`);
+    //     }
+
+    //     let { content } = createNewsDto;
+
+    //     const imageRegex = /<img.*?src="([^"]+)".*?>/g;
+    //     const timeRegex = /<time datetime="([^"]+)">/;
+    //     let match: any[];
+    //     const imagePromises = [];
+
+    //     while ((match = imageRegex.exec(content)) !== null) {
+    //         const imageUrl = match[1];
+
+    //         if (imageUrl.startsWith('data:image/')) {
+    //             imagePromises.push(this.imageService.saveBase64Image(imageUrl, createNewsDto.title));
+    //         } else {
+    //             imagePromises.push(this.imageService.downloadImage(imageUrl, createNewsDto.title));
+    //         }
+    //     }
+
+    //     const savedImageObjects = await Promise.all(imagePromises);
+
+    //     savedImageObjects.forEach((imageObj) => {
+    //         const escapedUrl = imageObj.originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    //         content = content.replace(new RegExp(escapedUrl, 'g'), imageObj.url);
+    //     });
+    //     createNewsDto.content = content;
+    //     createNewsDto.images = savedImageObjects.map(image => image.url); 
+    //     const timeMatch = content.match(timeRegex);
+    //     const datetime = timeMatch ? new Date(timeMatch[1]) : null;
+    //     const previewText = this.extractTextFromParagraphs(content);
+
+
+    //     const firstImageMatch = content.match(/<img.*?src="([^"]+)".*?>/);
+    //     const previewImg = firstImageMatch ? firstImageMatch[1] : `src="/preview/qwerty.jpeg"`;
+
+    //     const news = new this.newsModel({
+    //         ...createNewsDto,
+    //         slug,
+    //         previewText,
+    //         datetime,
+    //         previewImg, 
+    //     });
+    //     return news.save();
+    // }
+
     async create(createNewsDto: CreateNewsDto): Promise<News> {
         const slug = this.generateSlug(createNewsDto.title);
         const baseUrl = this.configService.baseUrl;
-    
+
         const existingNews = await this.newsModel.findOne({ slug });
         if (existingNews) {
             throw new ConflictException(`Новина з ярликом "${slug}" вже існує`);
         }
-    
+
         let { content } = createNewsDto;
-    
         const imageRegex = /<img.*?src="([^"]+)".*?>/g;
         const timeRegex = /<time datetime="([^"]+)">/;
         let match: any[];
         const imagePromises = [];
-    
+
         while ((match = imageRegex.exec(content)) !== null) {
             const imageUrl = match[1];
-    
+
             if (imageUrl.startsWith('data:image/')) {
                 imagePromises.push(this.imageService.saveBase64Image(imageUrl, createNewsDto.title));
             } else {
                 imagePromises.push(this.imageService.downloadImage(imageUrl, createNewsDto.title));
             }
         }
-    
+
         const savedImageObjects = await Promise.all(imagePromises);
-    
+
         savedImageObjects.forEach((imageObj) => {
             const escapedUrl = imageObj.originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             content = content.replace(new RegExp(escapedUrl, 'g'), imageObj.url);
         });
+
         createNewsDto.content = content;
-        createNewsDto.images = savedImageObjects.map(image => image.url); 
+        createNewsDto.images = savedImageObjects.map(image => image.url);
         const timeMatch = content.match(timeRegex);
         const datetime = timeMatch ? new Date(timeMatch[1]) : null;
         const previewText = this.extractTextFromParagraphs(content);
-    
-        
+
         const firstImageMatch = content.match(/<img.*?src="([^"]+)".*?>/);
         const previewImg = firstImageMatch ? firstImageMatch[1] : `src="/preview/qwerty.jpeg"`;
-    
+
         const news = new this.newsModel({
             ...createNewsDto,
             slug,
             previewText,
             datetime,
-            previewImg, 
+            previewImg,
         });
-        return news.save();
+
+        const savedNews = await news.save();
+
+        await this.sendNewsToSubscribers(savedNews);
+
+        return savedNews;
     }
+
+    private async sendNewsToSubscribers(news: News): Promise<void> {
+        const subscribers = await this.subscriptionModel.find({ subscribed: true });
+        const newsLink = `${this.configService.frontendBaseUrl}/uk/novyny/${news.slug}`;
+
+
+        const emailPromises = subscribers.map((subscriber) => {
+            return this.mailerService.sendMail(
+                subscriber.email,
+                `Нова новина: ${news.title}`,
+                `Деталі новини доступні за посиланням: ${newsLink}`,
+                `<p>Деталі новини доступні за посиланням: <a href="${newsLink}">${newsLink}</a></p>`
+            );
+        });
+
+        try {
+            await Promise.all(emailPromises);
+            console.log('Розсилка новин успішно виконана');
+        } catch (error) {
+            console.error('Помилка під час розсилки новин:', error);
+        }
+    }
+
 
     async searchNews(searchParams: any): Promise<any[]> {
         const { query, date, topic } = searchParams;
@@ -136,7 +218,7 @@ export class NewsService {
         const newsFilters: any = {};
         const ppoFilters: any = {};
         const galleryFilters: any = {};
-       
+
         if (query) {
             newsFilters.$or = [
                 { title: { $regex: query, $options: 'i' } },
@@ -153,7 +235,7 @@ export class NewsService {
         if (topic) {
             newsFilters.sections = { $in: [topic] };
         }
-        
+
         if (query) {
             ppoFilters.$or = [
                 { region: { $regex: query.trim(), $options: 'i' } },
@@ -169,8 +251,8 @@ export class NewsService {
                 { committee: { $regex: query.trim(), $options: 'i' } },
             ];
         }
-    
-        
+
+
         if (query) {
             galleryFilters.$or = [
                 { title: { $regex: query, $options: 'i' } },
@@ -188,7 +270,7 @@ export class NewsService {
         if (topic) {
             galleryFilters.sections = { $in: [topic] };
         }
-    
+
         try {
             // Поиск в коллекциях
             const [newsResults, ppoResults, galleryResults] = await Promise.all([
@@ -196,11 +278,11 @@ export class NewsService {
                 this.ppoModel.find(ppoFilters).exec(),
                 this.galleryModel.find(galleryFilters).exec(),
             ]);
-    
+
             logger.log(`Found News results: ${newsResults.length}`);
             logger.log(`Found PPO results: ${ppoResults.length}`);
             logger.log(`Found Gallery results: ${galleryResults.length}`);
-    
+
             // Возврат объединённых результатов
             return [...newsResults, ...ppoResults, ...galleryResults];
         } catch (error) {
@@ -208,7 +290,7 @@ export class NewsService {
             throw error;
         }
     }
-    
+
 
     async findWithFilters(filters: any): Promise<any[]> {
         console.log('Applied Filters:', filters);
@@ -239,17 +321,17 @@ export class NewsService {
     async update(slug: string, updateNewsDto: UpdateNewsDto): Promise<News> {
         if (updateNewsDto.content) {
             const previewText = this.extractTextFromParagraphs(updateNewsDto.content);
-            updateNewsDto.previewText = previewText; 
+            updateNewsDto.previewText = previewText;
         }
-    
+
         const updatedNews = await this.newsModel
             .findOneAndUpdate({ slug }, updateNewsDto, { new: true })
             .exec();
-            
+
         if (!updatedNews) {
             throw new NotFoundException('News not found');
         }
-    
+
         return updatedNews;
     }
 

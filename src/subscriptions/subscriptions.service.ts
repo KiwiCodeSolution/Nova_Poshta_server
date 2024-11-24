@@ -22,6 +22,9 @@ export class SubscriptionService {
         return newSubscription.save();
     }
 
+    async getSubscribedUsers(): Promise<Subscription[]> {
+        return this.subscriptionModel.find({ subscribed: true });
+    }
     
 
       async updateSubscription(updateSubscriptionDto: UpdateSubscriptDto): Promise<Subscription> {
