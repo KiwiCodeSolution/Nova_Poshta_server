@@ -2,10 +2,14 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { MailerService } from './mailer.service';
 import { MailerDto } from './dto/mailer_send.dto';
 import { MembershipRequestDto } from './dto/Membersmembership_request.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('email')
 export class MailerController {
-  constructor(private readonly mailerService: MailerService) { }
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
+  ) { }
 
   @Post('send')
   async sendEmail(@Body() dto: MailerDto) {
@@ -23,10 +27,11 @@ export class MailerController {
       <p>Регіон: ${region}</p>
       <p>Телефон: ${phone}</p>
     `;
-
+    const emailRecipients = this.configService.get<string>('MEMBERSHIP_EMAILS');
     return this.mailerService.sendMail(
-      'taar12sh@gmail.com',
+      // 'taar12sh@gmail.com',
       // 'E.a.poduzova@gmail.com',
+      emailRecipients,
       subject,
       text,
       html,

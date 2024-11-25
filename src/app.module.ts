@@ -16,6 +16,8 @@ import { PpoService } from './ppo/ppo.service';
 import { PpoController } from './ppo/ppo.controller';
 import { PpoModule } from './ppo/ppo.module';
 import { GallereyModule } from './gallerey/gallerey.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { GallereyModule } from './gallerey/gallerey.module';
     ContactsModule,
     SubscriptionsModule,
     FilesModule,
+    MailerModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads/',
